@@ -4,10 +4,10 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="tools", # Replace with your own username
-    version="0.0.1",
+    name="tools_jsyoo61", # Replace with your own username
+    version="2020.10",
     author="JaeSung Yoo",
-    author_email="jsyoo61r@korea.ac.kr",
+    author_email="jsyoo61@korea.ac.kr",
     description="personal syntax tool",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -19,4 +19,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
+    install_requires=['numpy','pandas','matplotlib','sklearn']
 )

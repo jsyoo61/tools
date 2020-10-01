@@ -68,3 +68,23 @@ def sample_train_data(dataset_A, dataset_B,ppgset_A,ppgset_B, n_frames=128):
     #train_data_A = np.expand_dims(train_data_A, axis=-1)
     #train_data_B = np.expand_dims(train_data_B, axis=-1)
     return train_data_A, train_data_B,train_data_ppg_A,train_data_ppg_B
+
+class Tree():
+
+    def __init__(self, data = None, parent = None):
+        self.data = data
+
+        self.parent = parent
+        self.children = list()
+        self.depth = 0
+
+    def __call__(self):
+        return self.data
+
+    def __getitem__(self, key):
+        pass
+
+    def __setitem__(self, key):
+        pass
+    def __len__(self):
+        pass
