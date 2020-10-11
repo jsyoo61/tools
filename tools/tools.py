@@ -53,19 +53,19 @@ def str2bool(x):
 
 def is_iterable(x):
     return hasattr(x, '__iter__')
-# Use '*' * 30
-# def stars():
-#     return '*' * 30
 
-# Use print('*' * 30)
-# def print_stars():
-#     print('*' * 30)
+class tdict(dict):
+    def __init__(self, *args, **kwargs):
+        super(tdict, self).__init__(*args, **kwargs)
 
-# Use dict.update()
-# def update_dict(dict, new_dict):
-#     for key, value in new_dict.items:
-#         dict[key] = value
-#     return dict
+    def __getattr__(self, key):
+        return self[key]
+
+    def __setattr__(self, key, value):
+        self.__setitem__(key, value)
+
+    def __delattr__(self, key):
+        self.__delitem__(key)
 
 class Printer():
     def __init__(self, filewrite_dir = None):
