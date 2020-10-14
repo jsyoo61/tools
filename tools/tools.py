@@ -91,10 +91,13 @@ class Timer():
     Parameters
     ----------
     print: bool (default: False)
-        if True, then prints self.elapsed_time whenever stop() is called
+        if True, then prints self.elapsed_time whenever stop() is called.
 
-    return: bool (default: True)
-        if True, then returns self.elapsed_time whenever stop() is called
+    return_f: bool (default: True)
+        if True, then returns self.elapsed_time whenever stop() is called.
+
+    auto_reset: bool (default: True)
+        if True, then resets whenever start() is called.
 
     Methods
     -------
