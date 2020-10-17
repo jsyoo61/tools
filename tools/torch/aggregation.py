@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 # %%
-def aggregation(model_source, model_target, weight = None):
+def aggregate(model_source, model_target, weight = None):
     '''
     model_source: List of nn.Model instances
     model_target: Single nn.Model instance
@@ -28,7 +28,7 @@ def aggregation(model_source, model_target, weight = None):
         for p_src, w in zip(p_src_tuple, weight):
             p_trg.data += (w * p_src.data).to(device)
 
-def distribution(model_source, model_target):
+def distribute(model_source, model_target):
     '''
     model_source: Single nn.Model instance
     model_target: List of nn.Model instances
@@ -40,6 +40,28 @@ def distribution(model_source, model_target):
         for p_trg in p_trg_tuple:
             device = p_trg.device
             p_trg.data[:] = p_src.data.to(device)
+
+def aggregate_grad(model_source, model_target):
+    '''
+    model_source: List of nn.Model instances
+    model_target: Single nn.Model instance
+    '''
+    for parameters in zip(model_target.parameters(), *[model.parameters() for model in model_source]):
+        p_trg = parameters[0]
+        p_src_tuple = parameters[1:]
+        # model_target's device
+        device = p_trg.device
+
+        for p_src in p_src_tuple:
+            p_trg.grad += p_src.grad.to(device)
+
+def distribute_all(model_source, model_target):
+    '''
+    model_source: Single nn.Model instance
+    model_target: List of nn.Model instances
+    '''
+    for model_target_ in model_target:
+        model_target_.load_state_dict(model_source.state_dict())
 
 def aggregate_state_dict(model_list, device):
     '''
@@ -63,7 +85,7 @@ def aggregate_state_dict(model_list, device):
 
     return state_dict
 
-def attentive_aggregation(model_source_list, model_target, step_size = 0.01, p = 2, optimizer = None):
+def attentive_aggregate(model_source_list, model_target, step_size = 0.01, p = 2, optimizer = None):
     '''
     perform attentive aggregation from source -> target.
     model_source_list: List of nn.Model instances
@@ -115,6 +137,38 @@ def attentive_aggregation(model_source_list, model_target, step_size = 0.01, p =
 
 
         # 4. apply gradient (either by adding or )
+
+# from model import DNN
+# import torch
+# import torch.nn as nn
+# import torch.nn.functional as F
+# import torch.optim as optim
+# n_input = 5
+# n_output = 10
+# n_hidden_list = [10,20,30,20]
+# n_model = 4
+# activation = [nn.Sigmoid(), nn.ReLU(), nn.LeakyReLU(0.03), nn.Tanh(), nn.Identity()]
+# model_list = [DNN(n_input, n_output, n_hidden_list, activation) for i in range(n_model)]
+#
+# model_source = model_list[1:]
+# model_target = model_list[0]
+# model_target.cuda()
+#
+# x = torch.randn(20,5)
+# for model in model_list:
+#     device = next(model.parameters()).device
+#     y_hat = model(x.to(device))
+#     loss = torch.sum(y_hat)
+#     loss.backward()
+#
+# p=list(model_target.parameters())
+# p[0].grad
+# next(model_source[0].parameters()).grad
+#
+# g = torch.zeros(10,5)
+# for model in model_list:
+#     g += next(model.parameters()).grad.cpu()
+# print('cumsum of gradient:\n',g)
 
 
 # %%
