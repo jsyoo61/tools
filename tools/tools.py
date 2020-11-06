@@ -54,6 +54,74 @@ def str2bool(x):
 def is_iterable(x):
     return hasattr(x, '__iter__')
 
+class Path(str):
+    '''
+    Joins paths by . syntax
+
+    Parameters
+    ----------
+    path: str (default: '')
+        Notes the default path. Leave for default blank value which means the current working directory.
+
+    Example
+    -------
+    >>> path = Path('C:/exp')
+    >>> path
+    path: C:/exp
+
+    >>> path.DATA = 'CelebA'
+    >>> path
+    path: C:/exp
+    DATA: C:/exp/CelebA
+
+    >>> path.PROCESSED = 'processed'
+    >>> path.PROCESSED.M1 = 'method1'
+    >>> path.PROCESSED.M2 = 'method2'
+    >>> path
+    path: C:/exp
+    DATA: C:/exp/CelebA
+    PROCESSED: C:/exp/processed
+
+    >>> path.PROCESSED
+    M1: C:/exp/processed/method1
+    M2: C:/exp/processed/method2
+
+    '''
+    def __init__(self, path='.'):
+        self.path=path
+
+    def __repr__(self):
+        return self.path
+
+
+    def __call__(self):
+        # Print out current, and children
+        for name, directory in self.__dict__.items():
+            print(name+': '+directory)
+            if type(directory) == Path:
+                directory()
+        print('\n'.join([key+': '+str(value) for key, value in self.__dict__.items()]))
+
+    def __str__(self):
+        return self.path
+
+    def __setattr__(self, key, value):
+        if hasattr(self, 'path'):
+            super(Path, self).__setattr__(key, Path(os.path.join(self.path, value)))
+        else:
+            super(Path, self).__setattr__(key, value)
+
+    def join(self, *args):
+        return os.path.join(self.path, *args)
+
+    def makedirs(self, exist_ok=True):
+        '''Make directories of all children paths'''
+        for directory in self.__dict__.values():
+            if directory is not '':
+                os.makedirs(directory, exist_ok=exist_ok)
+                if type(directory) == Path:
+                    directory.makedirs(exist_ok=exist_ok)
+
 class tdict(dict):
     def __init__(self, *args, **kwargs):
         super(tdict, self).__init__(*args, **kwargs)
