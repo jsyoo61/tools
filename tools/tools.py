@@ -60,7 +60,7 @@ class Path(str):
 
     Parameters
     ----------
-    path: str (default: '')
+    path: str (default: '.')
         Notes the default path. Leave for default blank value which means the current working directory.
 
     Example
@@ -97,10 +97,11 @@ class Path(str):
     def __call__(self):
         # Print out current, and children
         for name, directory in self.__dict__.items():
-            print(name+': '+directory)
-            if type(directory) == Path:
-                directory()
-        print('\n'.join([key+': '+str(value) for key, value in self.__dict__.items()]))
+            if name is not 'path':
+                print(name+': '+directory)
+                if type(directory) == Path:
+                    directory()
+        # print('\n'.join([key+': '+str(value) for key, value in self.__dict__.items()]))
 
     def __str__(self):
         return self.path

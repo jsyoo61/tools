@@ -46,5 +46,10 @@ for epoch in range(1, epochs+1):
 
         # 4-3. Validation
 
+    # Early stopping
+
+    # Save intermediate model
+    # Save only if validation loss has decreased
+
 # 5. Save model
 torch.save('model.pth', model.state_dict())
