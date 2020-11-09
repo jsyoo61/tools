@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="tools_jsyoo61", # Replace with your own username
-    version="2020.10.17",
+    name="tools-jsyoo61", # Replace with your own username
+    version="2020.11.9",
     author="JaeSung Yoo",
     author_email="jsyoo61@korea.ac.kr",
     description="personal syntax tool",
