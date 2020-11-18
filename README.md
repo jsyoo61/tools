@@ -4,7 +4,7 @@ My personal tools for python programming.\
 JaeSung Yoo\
 jsyoo61@korea.ac.kr
 
-    pip install tools
+    pip install tools-jsyoo61
     
     from tools.tools import load_pickle, save_pickle, path, tdict
 
