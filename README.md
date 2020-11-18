@@ -4,7 +4,7 @@ My personal tools for programming.\
 JaeSung Yoo\
 jsyoo61@korea.ac.kr
 
-Most useful functions are in `tools.tools`
+Most useful functions are in `tools.tools`\
 API dependent tools are in their corresponding folders: `tools.API_name` (i.e. `tools.torch.optim`)
 
 
