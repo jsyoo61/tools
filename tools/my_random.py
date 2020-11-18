@@ -1,6 +1,14 @@
 import numpy as np
 
 def choice(a, size=None, replace=True):
+    '''
+    Randomly choose elements from given iterable.
+
+    Parameters
+    ----------
+    choice of
+
+    '''
     m = len(a)
     # Single sample
     if size==None:
@@ -20,3 +28,5 @@ def choice(a, size=None, replace=True):
         np.random.shuffle(random_i)
         random_i = random_i[:num_sample]
         return a[random_i].reshape(size)
+
+help(choice)

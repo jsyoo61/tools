@@ -2,14 +2,18 @@ import os
 import pickle
 import time
 import subprocess
+'''import tools.tools as tools'''
 
 def save_pickle(obj, path = None):
+    '''Save object as Pickle file to designated path.
+    If path is not given, default to "YearMonthDay_HourMinuteSecond.p" '''
     if path == None:
         path = time.strftime('%y%m%d_%H%M%S.p')
     with open(path, 'wb') as f:
         pickle.dump(obj, f)
 
 def load_pickle(path):
+    '''Load Pickle file from designated path'''
     with open(path, 'rb') as f:
         return pickle.load(f)
 
@@ -38,6 +42,7 @@ def readlines(path, encoding = None):
     return text
 
 def cmd(command):
+    '''Run shell command'''
     pipe = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
     return pipe.stdout
 
@@ -125,6 +130,17 @@ class Path(str):
                     directory.makedirs(exist_ok=exist_ok)
 
 class tdict(dict):
+    '''
+    Dictionary which can get items via attribute notation (class.attribute)
+
+    Parameters
+    ----------
+    Identical to dict()
+
+    Example
+    -------
+
+    '''
     def __init__(self, *args, **kwargs):
         super(tdict, self).__init__(*args, **kwargs)
 

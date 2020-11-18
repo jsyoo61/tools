@@ -7,6 +7,9 @@ from torch.utils.data import DataLoader
 
 from model import Model
 
+cuda = torch.cuda.is_available()
+Tensor = torch.cuda.FloatTensor if cuda else torch.Tensor
+
 # 1. Load data
 x_train = np.random.rand(200,10).astype(np.float32)
 

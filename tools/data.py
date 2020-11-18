@@ -70,7 +70,7 @@ def sample_train_data(dataset_A, dataset_B,ppgset_A,ppgset_B, n_frames=128):
     return train_data_A, train_data_B,train_data_ppg_A,train_data_ppg_B
 
 class Tree():
-
+    '''Not implemented yet'''
     def __init__(self, data = None, parent = None):
         self.data = data
 
