@@ -11,7 +11,7 @@ cuda = torch.cuda.is_available()
 Tensor = torch.cuda.FloatTensor if cuda else torch.Tensor
 
 # 1. Load data
-x_train = np.random.rand(200,10).astype(np.float32)
+
 
 # 2. Hyperparameters
 lr = 1e-4
@@ -19,8 +19,7 @@ batch_size = 150
 epochs = 30
 
 # 3. Create model
-h_list = [4,4,4]
-model = Model(input_size=8, output_size=3, h_list=h_list)
+# model = Model(input_size=8, output_size=3, h_list=h_list)
 model.cuda()
 optimizer = optim.Adam(model.parameters(), lr=lr)
 
