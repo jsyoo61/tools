@@ -30,7 +30,7 @@ class DNN(nn.Module):
       )
     )
     '''
-    def __init__(self, n_input, n_output, n_hidden_list, activation):
+    def __init__(self, n_input, n_output, n_hidden_list, activation_list):
         super(DNN, self).__init__()
         if type(activation) is not list:
             activation = [activation]*(len(n_hidden_list)+1)

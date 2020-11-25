@@ -1,5 +1,5 @@
 
-from . import aggregation, model
+from . import federated_learning, model
 
 def device_of(nn_module):
     return next(nn_module.parameters()).device

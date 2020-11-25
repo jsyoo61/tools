@@ -6,7 +6,8 @@ def choice(a, size=None, replace=True):
 
     Parameters
     ----------
-    choice of
+    a: int or list
+        choice of
 
     '''
     m = len(a)
@@ -28,5 +29,3 @@ def choice(a, size=None, replace=True):
         np.random.shuffle(random_i)
         random_i = random_i[:num_sample]
         return a[random_i].reshape(size)
-
-help(choice)

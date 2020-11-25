@@ -55,6 +55,29 @@ def aggregate_grad(model_source, model_target):
         for p_src in p_src_tuple:
             p_trg.grad += p_src.grad.to(device)
 
+def aggregate_all (model_source, model_target):
+    '''
+    model_source: List of nn.Model instances
+    model_target: Single nn.Model instance
+    '''
+    device = next(model.parameters()).device
+    state_dict = {}
+    state_dict_list = []
+    for model in model_source:
+        for key, value in model.state_dict().items():
+            if 'weight' in key or 'bias' in key:
+                continue
+            if key not in state_dict:
+                state_dict[key] = value.clone().to(device)
+            else:
+                state_dict[key] += value.to(device)
+
+    n_model = len(model_source)
+    for key in state_dict:
+        state_dict[key] /= n_model
+
+    model_target.load_state_dict(state_dict)
+
 def distribute_all(model_source, model_target):
     '''
     model_source: Single nn.Model instance
