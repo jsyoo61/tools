@@ -10,14 +10,13 @@ class DNN(nn.Module):
     Parameters
     ----------
     n_input: number of input (int)
-    n_output: number of output (int)
     n_hidden_list: list of hidden neurons (list of int)
-    activation: torch.nn activation function instances (nn activation instance or list)
+    activation_list: torch.nn activation function instances (nn activation instance or list)
 
     Example
     -------
-    >>> model = DNN(n_input=10, n_output=5, n_hidden_list=[8,6], activation=[nn.Sigmoid(), nn.ReLU(), nn.tanh()])
-    # activation corresponds to [h1, h2, output]
+    >>> model = DNN(n_input=10, n_hidden_list=[8,6,5], activation_list=[nn.Sigmoid(), nn.ReLU(), nn.Tanh()])
+    # n_hidden_list, activation_list corresponds to [h1, h2, output]
     >>> print(model)
     DNN(
       (fc): Sequential(
@@ -30,19 +29,17 @@ class DNN(nn.Module):
       )
     )
     '''
-    def __init__(self, n_input, n_output, n_hidden_list, activation_list):
+    def __init__(self, n_input, n_hidden_list, activation_list):
         super(DNN, self).__init__()
-        if type(activation) is not list:
-            activation = [activation]*(len(n_hidden_list)+1)
-        assert len(activation)==len(n_hidden_list)+1, 'length of layers and activations must match. If you want no activation, use nn.Identity'
+        if type(activation_list) is not list:
+            activation_list = [activation_list]*len(n_hidden_list)
+        assert len(activation_list)==len(n_hidden_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
 
         # 1st layer
-        layers = [nn.Linear(n_input, n_hidden_list[0]), activation[0]]
-        # Hidden layers
+        layers = [nn.Linear(n_input, n_hidden_list[0]), activation_list[0]]
+        # Hidden layers ~ Output layer
         for i in range(len(n_hidden_list) - 1):
-            layers.extend([nn.Linear(n_hidden_list[i], n_hidden_list[i+1]), activation[i+1]])
-        # Output layer
-        layers.extend([nn.Linear(n_hidden_list[-1], n_output), activation[-1]])
+            layers.extend([nn.Linear(n_hidden_list[i], n_hidden_list[i+1]), activation_list[i+1]])
 
         self.fc = nn.Sequential(*layers)
 
@@ -60,8 +57,7 @@ def residual_computation(sequential, x, connection='sequential'):
 
 if __name__ == '__main__':
     n_input = 5
-    n_output = 10
-    n_hidden_list = [10,20,30,20]
-    activation = [nn.Sigmoid(), nn.ReLU(), nn.LeakyReLU(0.03), nn.Tanh(), nn.Identity()]
-    model = DNN(n_input, n_output, n_hidden_list, activation)
+    n_hidden_list = [10,20,30,20,10]
+    activation_lisy = [nn.Sigmoid(), nn.ReLU(), nn.LeakyReLU(0.03), nn.Tanh(), nn.Identity()]
+    model = DNN(n_input, n_hidden_list, activation_lisy)
     print(model)

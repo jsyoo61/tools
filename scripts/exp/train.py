@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 from model import Model
 
@@ -16,7 +17,7 @@ Tensor = torch.cuda.FloatTensor if cuda else torch.Tensor
 # 2. Hyperparameters
 lr = 1e-4
 batch_size = 150
-epochs = 30
+n_epoch = 30
 
 # 3. Create model
 # model = Model(input_size=8, output_size=3, h_list=h_list)
@@ -26,10 +27,15 @@ optimizer = optim.Adam(model.parameters(), lr=lr)
 train_dataset = DataLoader(x_train, batch_size=batch_size, shuffle=True) # https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader
 criterion = nn.MSELoss()
 
-# 4. Train
-for epoch in range(1, epochs+1):
+# 4. SummaryWriter
+writer = SummaryWriter()
+train_meter = AverageMeter()
+train_loss_list = []
 
-    for x, y in train_dataset:
+# 4. Train
+for epoch in range(1, n_epoch+1):
+    train_meter.reset()
+    for i, (x, y) in zip(count(1), train_dataset):
         x = x.cuda()
         y = y.cuda()
 
@@ -41,13 +47,17 @@ for epoch in range(1, epochs+1):
         loss.backward()
         optimizer.step()
 
+        train_meter.step(loss.item())
+        writer.add_scalar('Loss/train/iter', loss.item(), i)
         # 4-1. Tensorboard
 
         # 4-2. Print
-        print(loss)
+        print('[Epoch: %s/%s][Iter: %s/%s][Loss: %s(%s)]'%(epoch, n_epoch, i, len(train_dataset), loss))
 
         # 4-3. Validation
 
+    train_loss_list.append(train_meter.avg)
+    writer.add_scalar('Loss/train/epoch', train_meter.avg, epoch)
     # Early stopping
 
     # Save intermediate model

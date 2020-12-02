@@ -60,7 +60,48 @@ def str2bool(x):
 def is_iterable(x):
     return hasattr(x, '__iter__')
 
-class Path(str):
+class Filename():
+    '''Class to handle Filename with suffix.
+    To call filename with suffix, call the instance.
+
+    Example
+    -------
+    >>> file = Filename('model', '.pt')
+    >>> file
+    (Filename, name: "model", suffix: ".pt")
+    >>> str(file)
+    "model"
+    >>> file()
+    "model.pt"
+    >>> (file+'1')
+    "model1"
+    >>> (file+'1')()
+    "model1.pt"
+    '''
+    def __init__(self,obj=None, suffix=''):
+        self.name = str(obj)
+        self.suffix = suffix
+
+    def __call__(self):
+        '''Add suffix and return str'''
+        return self.name+self.suffix
+
+    def __radd__(self, other):
+        return Filename(other+self.name,suffix=self.suffix)
+
+    def __add__(self, other):
+        return Filename(self.name+other,suffix=self.suffix)
+
+    def __mul__(self, other):
+        return Filename(self.name*other,suffix=self.suffix)
+
+    def __repr__(self):
+        return '(Filename, name: "%s", suffix: "%s")'%(self.name, self.suffix)
+
+    def __str__(self):
+        return self.name
+
+class Path():
     '''
     Joins paths by . syntax
 
@@ -104,7 +145,7 @@ class Path(str):
         # Print out current, and children
         for name, directory in self.__dict__.items():
             if name is not 'path':
-                print(name+': '+directory)
+                print(name+': '+str(directory))
                 if type(directory) == Path:
                     directory()
         # print('\n'.join([key+': '+str(value) for key, value in self.__dict__.items()]))
@@ -229,7 +270,14 @@ class Timer():
         self.elapsed_time = 0
 
 class AverageMeter(object):
-    """Computes and stores the average and current value"""
+    """Computes and stores the average and current value
+    Variables
+    ---------
+    self.val
+    self.avg
+    self.sum
+    self.count
+    """
 
     def __init__(self):
         self.reset()
@@ -240,7 +288,7 @@ class AverageMeter(object):
         self.sum = 0
         self.count = 0
 
-    def update(self, val, n=1):
+    def step(self, val, n=1):
         self.val = val
         self.sum += val * n
         self.count += n
