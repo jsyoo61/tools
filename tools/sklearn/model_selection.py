@@ -1,9 +1,16 @@
 from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import ShuffleSplit
+from sklearn.model_selection import ShuffleSplit, train_test_split
+import numpy as np
 
-def train_val_test_split(x, y):
-    ss = ShuffleSplit()
-    return
+def train_val_test_split(x, val_size=0.1, test_size=0.1, random_state=None):
+    if type(x)==int:
+        x = np.zeros(x)
+    ss = ShuffleSplit(n_splits=1, test_size=test_size, random_state=random_state)
+    train_val_i, test_i = next(ss.split(x))
+    train_i, val_i = train_test_split(train_val_i, test_size=val_size/(1-test_size), random_state=random_state)
+
+    # assert len(set(np.concatenate((train_i, val_i, test_i)))) == len(x)
+    return train_i, val_i, test_i
 
 class MultiGridSearchCV():
     '''Perform Grid Search over multiple models

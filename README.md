@@ -6,7 +6,7 @@ jsyoo61@korea.ac.kr
 
     pip install tools-jsyoo61
 
-    from tools.tools import load_pickle, save_pickle, path, tdict
+    from tools import load_pickle, save_pickle, path, tdict
 
 Most useful functions are in `tools.tools`\
 API dependent tools are in their corresponding folders: `tools.API_name` (i.e. `tools.torch.optim`)

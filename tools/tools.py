@@ -2,6 +2,7 @@ import os
 import pickle
 import time
 import subprocess
+from pathlib import Path as P
 '''import tools.tools as tools'''
 
 def save_pickle(obj, path = None):
@@ -60,8 +61,17 @@ def str2bool(x):
 def is_iterable(x):
     return hasattr(x, '__iter__')
 
+def now(format='-'):
+    if format=='-':
+        return time.strftime('%Y-%m-%d_%H-%M-%S')
+    elif format=='_':
+        return time.strftime('%y%m%d_%H%M%S')
+    else:
+        raise Exception("format has to be one of ['-', '_']")
+
 class Filename():
-    '''Class to handle Filename with suffix.
+    '''(Will be deprecated since Path() can be used)
+    Class to handle Filename with suffix.
     To call filename with suffix, call the instance.
 
     Example
@@ -101,9 +111,10 @@ class Filename():
     def __str__(self):
         return self.name
 
-class Path():
+class Path(str):
     '''
     Joins paths by . syntax
+    Use pathlib.Path internally
 
     Parameters
     ----------
@@ -132,6 +143,7 @@ class Path():
     >>> path.PROCESSED
     M1: C:/exp/processed/method1
     M2: C:/exp/processed/method2
+    -------
 
     '''
     def __init__(self, path='.'):
@@ -142,7 +154,7 @@ class Path():
 
 
     def __call__(self):
-        # Print out current, and children
+        '''Print out current path, and children'''
         for name, directory in self.__dict__.items():
             if name is not 'path':
                 print(name+': '+str(directory))
@@ -154,6 +166,7 @@ class Path():
         return self.path
 
     def __setattr__(self, key, value):
+        # super(Path, self).__setattr__(key, self / value) # self.joinpath(value)
         if hasattr(self, 'path'):
             super(Path, self).__setattr__(key, Path(os.path.join(self.path, value)))
         else:
@@ -163,10 +176,15 @@ class Path():
         return os.path.join(self.path, *args)
 
     def makedirs(self, exist_ok=True):
-        '''Make directories of all children paths'''
+        '''Make directories of all children paths
+        Be sure to define all folders first, makedirs(), and then define files in Path(),
+        since defining files before makedirs() will lead to creating directories with names of files.
+        It is possible to ignore paths with "." as all files do, but there are hidden directories that
+        start with "." which makes things complicated. Thus, defining folders -> makedirs() -> define files
+        is recommended.'''
         for directory in self.__dict__.values():
             if directory is not '':
-                os.makedirs(directory, exist_ok=exist_ok)
+                os.makedirs(str(directory), exist_ok=exist_ok)
                 if type(directory) == Path:
                     directory.makedirs(exist_ok=exist_ok)
 
