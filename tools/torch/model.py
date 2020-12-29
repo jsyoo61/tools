@@ -30,7 +30,7 @@ class DNN(nn.Module):
     )-
     '''
     def __init__(self, n_input, n_hidden_list, activation_list):
-        super(DNN, self).__init__()
+        super().__init__()
         if type(activation_list) is not list:
             activation_list = [activation_list]*len(n_hidden_list)
         assert len(activation_list)==len(n_hidden_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
@@ -71,7 +71,7 @@ class DNN_Resnet(nn.Module):
 
     '''
     def __init__(self, n_input, n_hidden_list, activation_list, skip=2):
-        super(Resnet, self).__init__()
+        super().__init__()
         if type(activation_list) is not list:
             activation_list = [activation_list]*len(n_hidden_list)
         assert len(activation_list)==len(n_hidden_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
@@ -111,7 +111,7 @@ class DNN_Resnet(nn.Module):
 
 class DNN_Densenet(nn.Module):
     def __init__(self, n_input, n_hidden_list, activation_list, skip=2):
-        super(Densenet, self).__init__()
+        super().__init__()
         if type(activation_list) is not list:
             activation_list = [activation_list]*len(n_hidden_list)
         assert len(activation_list)==len(n_hidden_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
@@ -155,7 +155,7 @@ class DNN_Densenet(nn.Module):
 
 class CNN(nn.Module):
     def __init__(self, in_channel, n_channel_list, activation_list, kernel_size=3):
-        super(CNN, self).__init__()
+        super().__init__()
         if type(activation_list) is not list:
             activation_list = [activation_list]*len(n_channel_list)
         assert len(activation_list)==len(n_channel_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
