@@ -79,7 +79,7 @@ class DNN_Resnet(nn.Module):
         assert skip >= 2, 'skip needs to be: skip >= 2, given: %s'%(skip)
 
         # 1st layer
-        layers = [nn.Flatten(1), nn.Linear(n_input, n_hidden_list[0])]
+        layers = [nn.Linear(n_input, n_hidden_list[0])]
         # Hidden layers ~ Output layer
         layers.extend([nn.Linear(n_hidden_list[i], n_hidden_list[i+1]) for i in range(len(n_hidden_list)-1)])
         self.fc = nn.ModuleList(layers)
@@ -94,6 +94,7 @@ class DNN_Resnet(nn.Module):
         # assert self.n_skip == len(self.skip_layers), 'something\'s wrong'
 
     def forward(self, x):
+        x = x.flatten(1)
         last_x = x
         skip_layers = iter(self.skip_layers)
         for i, (layer, activation) in enumerate(zip(self.fc, self.activation_list)):
