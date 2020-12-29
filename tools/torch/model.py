@@ -153,6 +153,105 @@ class DNN_Densenet(nn.Module):
 
         return x
 
+class CNN(nn.Module):
+    def __init__(self, in_channel, n_channel_list, activation_list, kernel_size=3):
+        super(CNN, self).__init__()
+        if type(activation_list) is not list:
+            activation_list = [activation_list]*len(n_channel_list)
+        assert len(activation_list)==len(n_channel_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
+
+        # 1st layer
+        padding = kernel_size // 2
+        layers = [nn.Conv2d(in_channels=in_channel, out_channels=n_channel_list[0], kernel_size=kernel_size, stride=1, padding=padding), activation_list[0]]
+        # Hidden layers ~ Output layer
+        for i in range(len(n_channel_list) - 1):
+            layers.extend([nn.Conv2d(in_channels=n_channel_list[i], out_channels=n_channel_list[i+1], kernel_size=kernel_size, stride=1, padding=padding), activation_list[i+1]])
+        self.layers = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.layers(x)
+
+class CNN_Resnet(nn.Module):
+    def __init__(self, in_channel, n_channel_list, activation_list, kernel_size=3, skip=2):
+        super().__init__()
+        if type(activation_list) is not list:
+            activation_list = [activation_list]*len(n_channel_list)
+        assert len(activation_list)==len(n_channel_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
+        assert kernel_size % 2 == 1, f'kernel size must be odd number, Got: ({kernel_size})'
+
+        # 1st layer
+        padding = kernel_size // 2
+        layers = [nn.Conv2d(in_channels=in_channel, out_channels=n_channel_list[0], kernel_size=kernel_size, stride=1, padding=padding)]
+        # Hidden layers ~ Output layer
+        layers.extend([nn.Conv2d(in_channels=n_channel_list[i], out_channels=n_channel_list[i+1], kernel_size=kernel_size, stride=1, padding=padding) for i in range(len(n_channel_list)-1)])
+        self.layers = nn.ModuleList(layers)
+        self.activation_list = nn.ModuleList(activation_list)
+
+        # Skip layers
+        self.skip = skip
+        n_skip_channel_list = [in_channel]+[n_channel_list[i] for i in range(skip-1, len(n_channel_list), skip)]
+        skip_layers = [nn.Conv2d(in_channels=n_skip_channel_list[i], out_channels=n_skip_channel_list[i+1], kernel_size=kernel_size, stride=1, padding=padding, bias=False) for i in range(len(n_skip_channel_list)-1)] # Bias already present at original layers
+        self.skip_layers = nn.ModuleList(skip_layers) # Need ModuleList, not list, so that the model can recognize this layers
+        self.n_skip = len(n_channel_list) // skip # number of skip layers
+        # assert self.n_skip == len(self.skip_layers), 'something\'s wrong'
+
+    def forward(self, x):
+        last_x = x
+        skip_layers = iter(self.skip_layers)
+        for i, (layer, activation) in enumerate(zip(self.layers, self.activation_list)):
+            if (i+1) % self.skip == 0:
+                skip_layer = next(skip_layers)
+                x = activation(layer(x)+skip_layer(last_x))
+                last_x = x
+            else:
+                x = activation(layer(x))
+        return x
+
+class CNN_Densenet(nn.Module):
+    def __init__(self, in_channel, n_channel_list, activation_list, kernel_size=3, skip=2):
+        super().__init__()
+        if type(activation_list) is not list:
+            activation_list = [activation_list]*len(n_channel_list)
+        assert len(activation_list)==len(n_channel_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
+        assert kernel_size % 2 == 1, f'kernel size must be odd number, Got: ({kernel_size})'
+
+        # 1st layer
+        padding = kernel_size // 2
+        layers = [nn.Conv2d(in_channels=in_channel, out_channels=n_channel_list[0], kernel_size=kernel_size, stride=1, padding=padding)]
+        # Hidden layers ~ Output layer
+        layers.extend([nn.Conv2d(in_channels=n_channel_list[i], out_channels=n_channel_list[i+1], kernel_size=kernel_size, stride=1, padding=padding) for i in range(len(n_channel_list)-1)])
+        self.layers = nn.ModuleList(layers)
+        self.activation_list = nn.ModuleList(activation_list)
+
+        # Skip layers
+        self.skip = skip
+        n_skip_channel_list = [in_channel]+[n_channel_list[i] for i in range(skip-1, len(n_channel_list), skip)]
+
+        skip_layers = nn.ModuleDict()
+        for i in range(1, len(n_skip_channel_list)):
+            for j in range(i):
+                skip_layers[str(j)+'_'+str(i)]=nn.Conv2d(in_channels=n_skip_channel_list[j], out_channels=n_skip_channel_list[i], kernel_size=kernel_size, stride=1, padding=padding, bias=False)
+        self.skip_layers = skip_layers
+
+        n = len(n_skip_channel_list)-1
+        self.n_skip = int(n*(n+1)/2)
+        assert self.n_skip == len(skip_layers), f'something wrong: n_skip({self.n_skip}), skip_layers({len(skip_layers)})'
+
+    def forward(self, x):
+        x_history = [x]
+        dest = 1 # Destination index of skip layers
+        for i, (layer, activation) in enumerate(zip(self.layers, self.activation_list)):
+            if (i+1) % self.skip == 0:
+                assert dest == len(x_history), f'Length of x_history{len(x_history)} and destination number{dest} must match'
+                skip_x = torch.stack([self.skip_layers[str(src)+'_'+str(dest)](x_) for src, x_ in enumerate(x_history)], dim=-1).sum(dim=-1)
+                x = activation(layer(x)+skip_x)
+                x_history.append(x)
+                dest += 1
+            else:
+                x = activation(layer(x))
+
+        return x
+
 # def residual_computation(sequential, x, connection='sequential'):
 #     if connection=='sequential':
 #         pass
