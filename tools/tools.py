@@ -69,6 +69,18 @@ def now(format='-'):
     else:
         raise Exception("format has to be one of ['-', '_']")
 
+import yaml
+def print_dict(d, **kwargs):
+    '''prettify long dictionary
+    Example
+    -------
+    >>> d = {'a':1, 'b':2, 'c':3}
+    >>> print_dict(d)
+
+    '''
+
+    return yaml.dumps(d, **kwargs)
+
 class Filename():
     '''(Will be deprecated since Path() can be used)
     Class to handle Filename with suffix.
