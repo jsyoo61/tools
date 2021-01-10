@@ -47,6 +47,9 @@ def cmd(command):
     pipe = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
     return pipe.stdout
 
+def prettify_dict(dictionary, indent=0):
+    return '\n'.join([' '*indent + str(k) +': '+str(v) if type(v)!=dict else str(k)+':\n'+prettify_dict(v, indent=indent+2) for k, v in dictionary.items()])
+
 # Used in Argparse
 def str2bool(x):
     true_list = ['t', 'true', 'y', 'yes', '1']
