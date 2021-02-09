@@ -23,6 +23,7 @@ n_epoch = 30
 # model = Model(input_size=8, output_size=3, h_list=h_list)
 model.cuda()
 optimizer = optim.Adam(model.parameters(), lr=lr)
+# lr_scheduler = optim.lr_scheduler()
 
 train_dataset = DataLoader(x_train, batch_size=batch_size, shuffle=True) # https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader
 criterion = nn.MSELoss()
@@ -36,6 +37,8 @@ train_loss_list = []
 for epoch in range(1, n_epoch+1):
     train_meter.reset()
     for i, (x, y) in zip(count(1), train_dataset):
+        N = len(x)
+
         x = x.cuda()
         y = y.cuda()
 
@@ -46,8 +49,9 @@ for epoch in range(1, n_epoch+1):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        lr_scheduler.step(loss.item())
 
-        train_meter.step(loss.item())
+        train_meter.step(loss.item(), n=N)
         writer.add_scalar('Loss/train/iter', loss.item(), i)
         # 4-1. Tensorboard
 
