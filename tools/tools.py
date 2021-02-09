@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path as P
 '''import tools.tools as tools'''
 
-def save_pickle(obj, path = None):
+def save_pickle(obj: str, path: str = None):
     '''Save object as Pickle file to designated path.
     If path is not given, default to "YearMonthDay_HourMinuteSecond.p" '''
     if path == None:
@@ -13,7 +13,7 @@ def save_pickle(obj, path = None):
     with open(path, 'wb') as f:
         pickle.dump(obj, f)
 
-def load_pickle(path):
+def load_pickle(path: str):
     '''Load Pickle file from designated path'''
     with open(path, 'rb') as f:
         return pickle.load(f)
@@ -42,7 +42,7 @@ def readlines(path, encoding = None):
         text = f.readlines()
     return text
 
-def cmd(command):
+def cmd(command: str):
     '''Run shell command'''
     pipe = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
     return pipe.stdout
@@ -64,7 +64,7 @@ def str2bool(x):
 def is_iterable(x):
     return hasattr(x, '__iter__')
 
-def now(format='-'):
+def now(format: str ='-'):
     if format=='-':
         return time.strftime('%Y-%m-%d_%H-%M-%S')
     elif format=='_':
