@@ -171,7 +171,7 @@ class Path(str):
     def __call__(self):
         '''Print out current path, and children'''
         for name, directory in self.__dict__.items():
-            if name is not 'path':
+            if name != 'path':
                 print(name+': '+str(directory))
                 if type(directory) == Path:
                     directory()
@@ -198,7 +198,7 @@ class Path(str):
         start with "." which makes things complicated. Thus, defining folders -> makedirs() -> define files
         is recommended.'''
         for directory in self.__dict__.values():
-            if directory is not '':
+            if directory != '':
                 os.makedirs(str(directory), exist_ok=exist_ok)
                 if type(directory) == Path:
                     directory.makedirs(exist_ok=exist_ok)
@@ -238,7 +238,7 @@ class Printer():
     def print(self, *args, end='\n', flush=False):
         self.add(' '.join([str(arg) for arg in args]))
         print(self.content, end=end, flush=flush)
-        if self.filewrite_dir is not None:
+        if self.filewrite_dir != None:
             append(self.content + end, self.filewrite_dir)
         self.content=''
 
