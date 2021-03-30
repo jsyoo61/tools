@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 def choice(a, size=None, replace=True):
     '''
@@ -29,3 +30,7 @@ def choice(a, size=None, replace=True):
         np.random.shuffle(random_i)
         random_i = random_i[:num_sample]
         return a[random_i].reshape(size)
+
+def seed(random_seed):
+    np.random.seed(random_seed)
+    torch.manual_seed(random_seed)
