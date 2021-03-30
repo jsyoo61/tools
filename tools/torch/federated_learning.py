@@ -11,7 +11,7 @@ def aggregate(model_source, model_target, weight = None):
         List of numbers. Must match the number of model_source.
         If None, then weight is set as 1/len(model_source)
     '''
-    if weight == None:
+    if weight is None:
         weight = [1/len(model_source)] * len(model_source)
     assert len(model_source) == len(weight), "length of model_source(%s) and weight(%s) does not match"%(len(model_source), len(weight))
 
