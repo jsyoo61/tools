@@ -1,6 +1,7 @@
 
 from . import federated_learning, model
 from ._pandas import *
+from .utils import *
 
 def device_of(nn_module):
     return next(nn_module.parameters()).device
