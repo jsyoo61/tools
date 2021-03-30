@@ -2,15 +2,38 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import ShuffleSplit, train_test_split
 import numpy as np
 
-def train_val_test_split(x, val_size=0.1, test_size=0.1, random_state=None):
-    if type(x)==int:
-        x = np.zeros(x)
-    ss = ShuffleSplit(n_splits=1, test_size=test_size, random_state=random_state)
-    train_val_i, test_i = next(ss.split(x))
-    train_i, val_i = train_test_split(train_val_i, test_size=val_size/(1-test_size), random_state=random_state)
+def stratified_train_test_split_i(y, test_size=0.15, random_state=None):
+    ''':return: indices of train_i, test_i'''
+    x = np.empty(len(y))
 
-    # assert len(set(np.concatenate((train_i, val_i, test_i)))) == len(x)
+    sss = StratifiedShuffleSplit(n_splits=1, test_size=test_size, random_state=random_state)
+    train_i, test_i = next(sss.split(x, y))
+    return train_i, test_i
+
+def stratified_train_val_test_split_i(y, val_size=0.15, test_size=0.15, random_state=None):
+    x = np.empty(len(y))
+
+    sss = StratifiedShuffleSplit(n_splits=1, test_size=test_size, random_state=random_state)
+    train_val_i, test_i = next(sss.split(x, y))
+
+    train_val_y = y[train_val_i]
+    x = np.empty(len(train_val_i))
+    sss = StratifiedShuffleSplit(n_splits=1, test_size=val_size/(1-test_size), random_state=random_state)
+    train_i_, val_i_ = next(sss.split(x, train_val_y))
+    train_i = train_val_i[train_i_]
+    val_i = train_val_i[val_i_]
+
     return train_i, val_i, test_i
+
+# def train_val_test_split(x, val_size=0.1, test_size=0.1, random_state=None):
+#     if type(x)==int:
+#         x = np.zeros(x)
+#     ss = ShuffleSplit(n_splits=1, test_size=test_size, random_state=random_state)
+#     train_val_i, test_i = next(ss.split(x))
+#     train_i, val_i = train_test_split(train_val_i, test_size=val_size/(1-test_size), random_state=random_state)
+#
+#     # assert len(set(np.concatenate((train_i, val_i, test_i)))) == len(x)
+#     return train_i, val_i, test_i
 
 class MultiGridSearchCV():
     '''Perform Grid Search over multiple models
