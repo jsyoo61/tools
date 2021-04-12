@@ -1,9 +1,29 @@
-import os
+import os as os
 import pickle
 import time
 import subprocess
 from pathlib import Path as P
-'''import tools.tools as tools'''
+import yaml
+
+__all__ = \
+['AverageMeter',
+ 'Filename',
+ 'Printer',
+ 'Timer',
+ 'append',
+ 'cmd',
+ 'is_iterable',
+ 'load_pickle',
+ 'now',
+ 'prettify_dict',
+ 'print_dict',
+ 'read',
+ 'readline',
+ 'readlines',
+ 'save_pickle',
+ 'str2bool',
+ 'tdict',
+ 'write']
 
 def save_pickle(obj: str, path: str = None):
     '''Save object as Pickle file to designated path.
@@ -72,7 +92,7 @@ def now(format: str ='-'):
     else:
         raise Exception("format has to be one of ['-', '_']")
 
-import yaml
+
 def print_dict(d, **kwargs):
     '''prettify long dictionary
     Example
@@ -202,6 +222,12 @@ class Path(str):
                 os.makedirs(str(directory), exist_ok=exist_ok)
                 if type(directory) == Path:
                     directory.makedirs(exist_ok=exist_ok)
+
+    def clear(self, ignore_errors=True):
+        '''Delete all files and directories in current directory'''
+        for directory in self.__dict__.values():
+            shutil.rmtree(directory, ignore_errors=ignore_errors)
+
 
 class tdict(dict):
     '''
