@@ -1,5 +1,5 @@
 from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import ShuffleSplit, train_test_split
+from sklearn.model_selection import StratifiedShuffleSplit, ShuffleSplit, train_test_split
 import numpy as np
 
 def stratified_train_test_split_i(y, test_size=0.15, random_state=None):
