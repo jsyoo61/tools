@@ -3,6 +3,23 @@ import torch
 import torch.nn as nn
 
 # %%
+def transfer(model_source, model_target):
+    '''
+    model_source: Single nn.Model instance
+    model_target: Single nn.Model instance
+
+    for multiple source or targets, refer to aggregate() or distribute()
+    '''
+    for p_trg, p_src in zip(model_target.parameters(), *model_source.parameters()):
+        # model_target's device
+        device = p_trg.device
+
+        # 1. Reset
+        p_trg.data[:] = 0
+
+        # 2. Add weighted sum
+        p_trg.data += p_src.data.to(device)
+
 def aggregate(model_source, model_target, weight = None):
     '''
     model_source: List of nn.Model instances

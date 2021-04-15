@@ -10,6 +10,7 @@ __all__ = \
  'Filename',
  'Printer',
  'Timer',
+ 'Path',
  'append',
  'cmd',
  'is_iterable',
