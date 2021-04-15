@@ -10,7 +10,7 @@ def transfer(model_source, model_target):
 
     for multiple source or targets, refer to aggregate() or distribute()
     '''
-    for p_trg, p_src in zip(model_target.parameters(), *model_source.parameters()):
+    for p_trg, p_src in zip(model_target.parameters(), model_source.parameters()):
         # model_target's device
         device = p_trg.device
 
@@ -19,6 +19,8 @@ def transfer(model_source, model_target):
 
         # 2. Add weighted sum
         p_trg.data += p_src.data.to(device)
+
+        '''# TODO: p_trg.data = torch.clone(p_src.data)'''
 
 def aggregate(model_source, model_target, weight = None):
     '''
