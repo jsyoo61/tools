@@ -6,7 +6,7 @@ __all__ = \
 def makedirs(path, exist_ok=True):
     os.makedirs(path, exist_ok=exist_ok)
 
-def listdir(path, isdir=False, isfile=False, join=False):
+def listdir(path=None, isdir=False, isfile=False, join=False):
     '''
     :func listdir:
 
