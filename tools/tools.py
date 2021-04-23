@@ -13,9 +13,11 @@ __all__ = \
  'Path',
  'append',
  'cmd',
+ 'equal',
  'is_iterable',
  'load_pickle',
  'now',
+ 'unnest_dict',
  'prettify_dict',
  'print_dict',
  'read',
@@ -68,6 +70,39 @@ def cmd(command: str):
     pipe = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
     return pipe.stdout
 
+def equal(lst):
+    if len(lst)<=1:
+        return True
+    else:
+        return all([lst[0]==value for value in lst[1:]])
+
+def unnest_dict(d):
+    '''Unnest nested dictionary.
+    Nested keys are concatenated with "." notation.
+    '''
+    un_d = {}
+    # d = d.copy()
+    for k, v in d.items():
+        if type(v)==dict:
+            un_d_ = unnest_dict(v)
+            for k_, v_ in un_d_.items():
+                un_d[str(k)+'.'+k_] = v_
+        else:
+            un_d[k] = v
+    return un_d
+
+def merge_dict(ld):
+    '''merge list of dicts
+    dict of lists
+    ld: list of dicts'''
+
+    keys = ld[0].keys()
+    d = {key:[] for key in keys}
+    for d_ in ld:
+
+
+    return d
+
 def prettify_dict(dictionary, indent=0):
     return '\n'.join([' '*indent + str(k) +': '+str(v) if type(v)!=dict else str(k)+':\n'+prettify_dict(v, indent=indent+2) for k, v in dictionary.items()])
 
@@ -85,6 +120,10 @@ def str2bool(x):
 def is_iterable(x):
     return hasattr(x, '__iter__')
 
+def is_equal(x):
+    '''returns True if all elements in the iterable is equal'''
+    pass
+
 def now(format: str ='-'):
     if format=='-':
         return time.strftime('%Y-%m-%d_%H-%M-%S')
@@ -92,7 +131,6 @@ def now(format: str ='-'):
         return time.strftime('%y%m%d_%H%M%S')
     else:
         raise Exception("format has to be one of ['-', '_']")
-
 
 def print_dict(d, **kwargs):
     '''prettify long dictionary
