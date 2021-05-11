@@ -14,16 +14,23 @@ def transfer(model_source, model_target):
         # model_target's device
         device = p_trg.device
 
-        # 1. Reset
-        p_trg.data[:] = 0
+        # Clone data. Becareful not to copy hard link! (never copy pointers)
+        p_trg.data = torch.clone(p_src.data).to(device)
 
-        # 2. Add weighted sum
-        p_trg.data += p_src.data.to(device)
+        # # 1. Reset
+        # data = torch.zeros_like(p_trg).to(device)
+        # # p_trg.data[:] = 0
+        #
+        # # 2. Add weighted sum
+        # data += p_src.data.to(device)
+        # p_trg.data += p_src.data.to(device)
 
         '''# TODO: p_trg.data = torch.clone(p_src.data)'''
 
 def aggregate(model_source, model_target, weight = None):
     '''
+    Aggregate parameters of the model
+
     model_source: List of nn.Model instances
     model_target: Single nn.Model instance
     weights: default = None
@@ -41,14 +48,20 @@ def aggregate(model_source, model_target, weight = None):
         device = p_trg.device
 
         # 1. Reset
-        p_trg.data[:] = 0
+        data = torch.zeros_like(p_trg)
+        # p_trg.data[:] = 0
 
         # 2. Add weighted sum
         for p_src, w in zip(p_src_tuple, weight):
-            p_trg.data += (w * p_src.data).to(device)
+            # p_trg.data += (w * p_src.data).to(device)
+            data += (w * p_src.data).to(device)
+
+        p_trg.data = data
 
 def distribute(model_source, model_target):
     '''
+    Distribute parameters of the model
+
     model_source: Single nn.Model instance
     model_target: List of nn.Model instances
     '''
@@ -58,7 +71,8 @@ def distribute(model_source, model_target):
 
         for p_trg in p_trg_tuple:
             device = p_trg.device
-            p_trg.data[:] = p_src.data.to(device)
+            # p_trg.data[:] = p_src.data.to(device)
+            p_trg.data = torch.clone(p_src.data).to(device)
 
 def aggregate_grad(model_source, model_target):
     '''
@@ -76,6 +90,9 @@ def aggregate_grad(model_source, model_target):
 
 def aggregate_all (model_source, model_target):
     '''
+    Aggregate parameters and states of the model.
+    States 
+
     model_source: List of nn.Model instances
     model_target: Single nn.Model instance
     '''
@@ -179,6 +196,121 @@ def attentive_aggregate(model_source_list, model_target, step_size = 0.01, p = 2
 
 
         # 4. apply gradient (either by adding or )
+
+# %%
+if __name__ == '__main__':
+
+    class A(nn.Module):
+        def __init__(self, i=1):
+            super().__init__()
+            self.x = nn.Linear(5,5)
+            self.x.weight.data = torch.full_like(self.x.weight, i)
+            self.x.bias.data = torch.full_like(self.x.bias, i)
+
+        def forward(self, x):
+            return
+
+    # %%
+    m1 = A(1)
+    m2 = A(2)
+    print(m1.x.weight)
+    print(m2.x.weight)
+    id(m1.x.weight)
+    id(m2.x.weight)
+    id(m1.x.weight.data)
+    id(m2.x.weight.data)
+
+    # Only the data is copied
+    m1.x.weight.data[:] = m2.x.weight.data
+    print(m1.x.weight)
+    print(m2.x.weight)
+    id(m1.x.weight)
+    id(m2.x.weight)
+    id(m1.x.weight.data)
+    id(m2.x.weight.data)
+
+    m1.x.weight.data += 1
+    print(m1.x.weight)
+    print(m2.x.weight)
+    id(m1.x.weight)
+    id(m2.x.weight)
+    id(m1.x.weight.data)
+    id(m2.x.weight.data)
+
+    # %%
+    # Change together. Linked
+    m1.x.weight.data = m2.x.weight.data
+    print(m1.x.weight)
+    print(m2.x.weight)
+    id(m1.x.weight)
+    id(m2.x.weight)
+    id(m1.x.weight.data)
+    id(m2.x.weight.data)
+
+    m1.x.weight.data += 1
+    print(m1.x.weight)
+    print(m2.x.weight)
+    id(m1.x.weight)
+    id(m2.x.weight)
+    id(m1.x.weight.data)
+    id(m2.x.weight.data)
+
+    # Not linked
+    m1.x.weight.data = torch.clone(m2.x.weight.data)
+    print(m1.x.weight)
+    print(m2.x.weight)
+    id(m1.x.weight)
+    id(m2.x.weight)
+    id(m1.x.weight.data)
+    id(m2.x.weight.data)
+
+    m1.x.weight.data += 1
+    print(m1.x.weight)
+    print(m2.x.weight)
+    id(m1.x.weight)
+    id(m2.x.weight)
+    id(m1.x.weight.data)
+    id(m2.x.weight.data)
+
+    # %%
+    # Not Linked
+    transfer(m1,m2)
+    print(m1.x.weight)
+    print(m2.x.weight)
+    id(m1.x.weight)
+    id(m2.x.weight)
+    id(m1.x.weight.data)
+    id(m2.x.weight.data)
+
+    m1.x.weight.data += 1
+    print(m1.x.weight)
+    print(m2.x.weight)
+    id(m1.x.weight)
+    id(m2.x.weight)
+    id(m1.x.weight.data)
+    id(m2.x.weight.data)
+
+    # %%
+    # Aggregate
+    m1=A(1)
+    m2=A(2)
+    m3=A(3)
+    aggregate([m1,m2], m3)
+    print(m1.x.weight)
+    print(m2.x.weight)
+    print(m3.x.weight)
+
+    # %%
+    # distribute
+    distribute(m3, [m1,m2])
+    print(m1.x.weight)
+    print(m2.x.weight)
+    print(m3.x.weight)
+    m1.x.weight.data += 1
+    m2.x.weight.data += 2
+    print(m1.x.weight)
+    print(m2.x.weight)
+    print(m3.x.weight)
 
 # from model import DNN
 # import torch

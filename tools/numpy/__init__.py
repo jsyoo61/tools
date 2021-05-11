@@ -1,11 +1,8 @@
+from ._f import *
+from ._utils import *
 
-from . import *
-
-def standardize(array, axis=None, ep=1e-20):
-    return (array - array.mean(axis=axis))/(array.std(axis=axis)+ep)
-
-def equal(array):
-    if len(array)<=1:
-        return True
-    else:
-        return (array[0]==array[1:]).all()
+if __name__ == '__main__':
+    ld = [{i:i+1 for i in range(5)} for j in range(3)]
+    merge_dict(ld)
+    ld = [{i:np.arange(i+1) for i in range(5)} for j in range(3)]
+    merge_dict(ld)

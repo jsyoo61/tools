@@ -1,9 +1,12 @@
+from copy import deepcopy as dcopy
 import os as os
-import pickle
-import time
-import subprocess
 from pathlib import Path as P
+import pickle
+import subprocess
+import time
 import yaml
+
+import matplotlib.pyplot as plt
 
 __all__ = \
 ['AverageMeter',
@@ -11,6 +14,7 @@ __all__ = \
  'Printer',
  'Timer',
  'Path',
+ 'ValueTracker'
  'append',
  'cmd',
  'equal',
@@ -18,6 +22,9 @@ __all__ = \
  'load_pickle',
  'now',
  'unnest_dict',
+ 'nestdict_to_list',
+ 'update_ld',
+ 'merge_dict',
  'prettify_dict',
  'print_dict',
  'read',
@@ -86,10 +93,34 @@ def unnest_dict(d):
         if type(v)==dict:
             un_d_ = unnest_dict(v)
             for k_, v_ in un_d_.items():
-                un_d[str(k)+'.'+k_] = v_
+                un_d[str(k)+'.'+str(k_)] = v_
         else:
             un_d[k] = v
     return un_d
+
+def nestdict_to_list(d, key=None):
+    '''
+    open 2nd order nested dict to list of dicts.
+    If key is given, then key of the 1st order dict will be merged to the dicts as "key: 1st_key"
+    '''
+    l = []
+    for k, v in d.items():
+        assert type(v) == dict
+        d_ = {}
+        if key != None:
+            d_[key] = k
+        d_.update(v)
+        l.append(d_)
+
+    return l
+
+def update_ld(ld, d):
+    '''add (key, value) to list of dicts'''
+    ld = dcopy(ld)
+    for d_ in ld:
+        d_.update(d)
+
+    return ld
 
 def merge_dict(ld):
     '''merge list of dicts
@@ -99,7 +130,7 @@ def merge_dict(ld):
     keys = ld[0].keys()
     d = {key:[] for key in keys}
     for d_ in ld:
-
+        pass
 
     return d
 
@@ -391,3 +422,64 @@ class AverageMeter(object):
         self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count
+
+class ValueTracker(object):
+    """ ValueTracker."""
+
+    def __repr__(self):
+        return f'<ValueTracker>\nx: {self.x}\ny: {self.y}'
+
+    def __init__(self):
+        self.reset()
+
+    def __iadd__(self, other):
+        self.x.extend(other.x)
+        self.y.extend(other.y)
+        self.label.extend(other.label)
+        self.n_step += len(other.x)
+        return self
+
+    def __add__(self, other):
+        self = deepcopy(self)
+        self.x.extend(other.x)
+        self.y.extend(other.y)
+        self.label.extend(other.label)
+        self.n_step += len(other.x)
+        return self
+
+    def reset(self):
+        self.x = []
+        self.y = []
+        self.label = []
+        self.n_step = 0
+
+    def numpy(self):
+        return np.array(self.x), np.array(self.y), np.array(self.label)
+
+    def step(self, x, y, label=None):
+        if hasattr(x, '__len__'):
+            assert hasattr(y, '__len__')
+            assert len(x)==len(y)
+            self.x.extend(x)
+            self.y.extend(y)
+            if label != None:
+                assert len(y)==len(label)
+                self.label.extend(label)
+            self.n_step += len(x)
+
+        else:
+            self.x.append(x)
+            self.y.append(y)
+            if label != None:
+                self.label.append(label)
+            self.n_step += 1
+
+    def plot(self, w=9, color='tab:blue', ax=None):
+        x = np.array(self.x)
+        y = np.array(self.y)
+        y_smooth = moving_mean(y, w)
+        if ax==None:
+            ax = plt.gca()
+        ax.plot(x, y, color=color, alpha=0.4)
+        ax.plot(x, y_smooth, color=color)
+        return ax
