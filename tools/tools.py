@@ -7,6 +7,7 @@ import time
 import yaml
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 __all__ = \
 ['AverageMeter',
@@ -14,7 +15,7 @@ __all__ = \
  'Printer',
  'Timer',
  'Path',
- 'ValueTracker'
+ 'ValueTracker',
  'append',
  'cmd',
  'equal',
@@ -32,6 +33,7 @@ __all__ = \
  'readlines',
  'save_pickle',
  'str2bool',
+ 'strisfloat',
  'tdict',
  'write']
 
@@ -147,6 +149,13 @@ def str2bool(x):
         return False
     else:
         raise Exception('input has to be in one of two forms:\nTrue: %s\nFalse: %s'%(true_list, false_list))
+
+def strisfloat(x):
+    try:
+        x=float(x)
+        return True
+    except ValueError:
+        return False
 
 def is_iterable(x):
     return hasattr(x, '__iter__')
