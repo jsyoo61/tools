@@ -13,7 +13,7 @@ def listdir(path=None, isdir=False, isfile=False, join=False):
     :param path:
     :param isdir:
     :param isfile:
-    to get files what start with ".", set isfile=''.
+    to get files which start with ".", set isfile=''.
     :param join:
     '''
     # Safety check
@@ -24,6 +24,8 @@ def listdir(path=None, isdir=False, isfile=False, join=False):
     else:
         isfile_str=False
     assert not (isdir and isfile), 'only one of argument "isdir" and "isfile" can be True'
+    if path == None:
+        path = '.'
 
     dir_list = os.listdir(path)
     dir_list_joined = [os.path.join(path, dir) for dir in dir_list]

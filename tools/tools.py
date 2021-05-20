@@ -287,7 +287,7 @@ class Path(str):
             super(Path, self).__setattr__(key, value)
 
     def join(self, *args):
-        return os.path.join(self.path, *args)
+        return Path(os.path.join(self.path, *args))
 
     def makedirs(self, exist_ok=True):
         '''Make directories of all children paths
