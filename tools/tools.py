@@ -13,6 +13,7 @@ __all__ = \
 ['AverageMeter',
  'Filename',
  'Printer',
+ 'TDict',
  'Timer',
  'Path',
  'ValueTracker',
@@ -20,6 +21,8 @@ __all__ = \
  'cmd',
  'equal',
  'is_iterable',
+ 'isnumeric',
+ 'isint',
  'load_pickle',
  'now',
  'unnest_dict',
@@ -34,7 +37,6 @@ __all__ = \
  'save_pickle',
  'str2bool',
  'strisfloat',
- 'tdict',
  'write']
 
 def save_pickle(obj: str, path: str = None):
@@ -155,6 +157,20 @@ def strisfloat(x):
         x=float(x)
         return True
     except ValueError:
+        return False
+
+def isnumeric(x):
+    try:
+        float(x)
+        return True
+    except ValueError or TypeError:
+        return False
+
+def isint(x):
+    try:
+        int(x)
+        return True
+    except ValueError or TypeError:
         return False
 
 def is_iterable(x):
@@ -308,7 +324,7 @@ class Path(str):
             shutil.rmtree(directory, ignore_errors=ignore_errors)
 
 
-class tdict(dict):
+class TDict(dict):
     '''
     Dictionary which can get items via attribute notation (class.attribute)
 
@@ -321,7 +337,7 @@ class tdict(dict):
 
     '''
     def __init__(self, *args, **kwargs):
-        super(tdict, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __getattr__(self, key):
         return self[key]

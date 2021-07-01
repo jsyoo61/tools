@@ -26,3 +26,22 @@ def multiprocessing_device(gpu_id = None):
                 return torch.device(f"cuda:{gpu_id}")
             except ValueError: # Parent process
                 return torch.cuda.default_stream().device
+
+def nanparam(model):
+    for p in model.parameters():
+        if torch.isnan(p).any():
+            return True
+    return False
+
+def nangrad(model):
+    for p in model.parameters():
+        if torch.isnan(p.grad).any():
+            return True
+    return False
+
+def param_same(model1, model2):
+    for p1, p2 in zip(model1.parameters(), model2.parameters()):
+        same = (p1==p2).all()
+        if not same:
+            return False
+    return True

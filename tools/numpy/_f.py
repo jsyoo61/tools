@@ -16,7 +16,6 @@ def binarize(array, threshold):
     return result
 
 def moving_mean(x, w):
-    
     odd = bool(w%2)
     edge = w//2
     if odd:

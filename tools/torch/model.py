@@ -29,6 +29,7 @@ class DNN(nn.Module):
       )
     )-
     '''
+    # def __init__(self, n_hidden_list, activation_list, n_input=None): -- LazyLinear
     def __init__(self, n_input, n_hidden_list, activation_list):
         super().__init__()
         if type(activation_list) is not list:
@@ -73,7 +74,7 @@ class DNN_Lazy(nn.Module):
       )
     )-
     '''
-    def __init__(self, n_input, n_hidden_list, activation_list):
+    def __init__(self, n_hidden_list, activation_list):
         super().__init__()
         if type(activation_list) is not list:
             activation_list = [activation_list]*len(n_hidden_list)
@@ -297,6 +298,35 @@ class CNN_Densenet(nn.Module):
 
         return x
 
+class Parallel(nn.Module):
+    def __init__(self, *args):
+        super().__init__()
+        self._layers = args
+        for i, layer in enumerate(args):
+            self.add_module(str(i), layer)
+
+    def forward(self, x):
+        y_list = [layer(x) for layer in self._layers]
+        y = sum(y_list)
+        return y
+
+    def __iter__(self):
+        self._i = 0
+        return self
+
+    def __next__(self):
+        if self._i < len(self):
+            layer = self[self._i]
+            self._i +=1
+            return layer
+        else:
+            raise StopIteration
+
+    def __len__(self):
+        return len(self._layers)
+
+    def __getitem__(self, idx):
+        return self._layers[idx]
 # def residual_computation(sequential, x, connection='sequential'):
 #     if connection=='sequential':
 #         pass

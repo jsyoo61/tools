@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="tools-jsyoo61", # Replace with your own username
-    version="2021.05.20.0",
+    version="2021.06.25.1",
     author="JaeSung Yoo",
     author_email="jsyoo61@korea.ac.kr",
     description="personal syntax tool",
