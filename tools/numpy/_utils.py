@@ -16,6 +16,9 @@ def equal(array):
         return (array[0]==array[1:]).all()
 
 def merge_dict(ld):
+    '''
+    :param ld: list of dicts [{}, {}, {}]
+    '''
     assert type(ld) == list, f'must give list of dicts, received: {type(ld)}'
     assert T.equal([list(d.keys()) for d in ld]), 'keys for every dict in the list of dicts must be the same'
     keys = ld[0].keys()
@@ -27,7 +30,7 @@ def merge_dict(ld):
         except ValueError:
             merged_d[k] = np.array(lv)
     return merged_d
-    
+
 # %%
 if __name__ == '__main__':
     ld = [{i:i+1 for i in range(5)} for j in range(3)]

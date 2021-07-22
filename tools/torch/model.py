@@ -29,59 +29,18 @@ class DNN(nn.Module):
       )
     )-
     '''
-    # def __init__(self, n_hidden_list, activation_list, n_input=None): -- LazyLinear
-    def __init__(self, n_input, n_hidden_list, activation_list):
+    def __init__(self, n_hidden_list, activation_list, n_input=None):
+    # def __init__(self, n_input, n_hidden_list, activation_list):
         super().__init__()
         if type(activation_list) is not list:
             activation_list = [activation_list]*len(n_hidden_list)
         assert len(activation_list)==len(n_hidden_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
 
-        # 1st layer
-        layers = [nn.Flatten(1), nn.Linear(n_input, n_hidden_list[0]), activation_list[0]]
-        # Hidden layers ~ Output layer
-        for i in range(len(n_hidden_list) - 1):
-            layers.extend([nn.Linear(n_hidden_list[i], n_hidden_list[i+1]), activation_list[i+1]])
-
-        self.fc = nn.Sequential(*layers)
-
-    def forward(self, x):
-        '''x.shape()==(batch_size, feature_dim)'''
-        return self.fc(x)
-
-class DNN_Lazy(nn.Module):
-    '''
-    basic DNN module
-
-    Parameters
-    ----------
-    n_input: number of input (int)
-    n_hidden_list: list of hidden neurons (list of int)
-    activation_list: torch.nn activation function instances (nn activation instance or list)
-
-    Example
-    -------
-    >>> model = DNN(n_input=10, n_hidden_list=[8,6,5], activation_list=[nn.Sigmoid(), nn.ReLU(), nn.Tanh()])
-    # n_hidden_list, activation_list corresponds to [h1, h2, output]
-    >>> print(model)
-    DNN(
-      (fc): Sequential(
-        (0): Linear(in_features=10, out_features=8, bias=True)
-        (1): Sigmoid()
-        (2): Linear(in_features=8, out_features=6, bias=True)
-        (3): ReLU()
-        (4): Linear(in_features=6, out_features=5, bias=True)
-        (5): Tanh()
-      )
-    )-
-    '''
-    def __init__(self, n_hidden_list, activation_list):
-        super().__init__()
-        if type(activation_list) is not list:
-            activation_list = [activation_list]*len(n_hidden_list)
-        assert len(activation_list)==len(n_hidden_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
-
-        # 1st layer
-        layers = [nn.Flatten(1), nn.LazyLinear(n_hidden_list[0]), activation_list[0]]
+        # 1st layer - Select Lazy if n_input is not specified
+        if n_input is None:
+            layers = [nn.Flatten(1), nn.LazyLinear(n_hidden_list[0]), activation_list[0]]
+        else:
+            layers = [nn.Flatten(1), nn.Linear(n_input, n_hidden_list[0]), activation_list[0]]
         # Hidden layers ~ Output layer
         for i in range(len(n_hidden_list) - 1):
             layers.extend([nn.Linear(n_hidden_list[i], n_hidden_list[i+1]), activation_list[i+1]])
@@ -115,7 +74,8 @@ class DNN_Resnet(nn.Module):
     >>> print(model)
 
     '''
-    def __init__(self, n_input, n_hidden_list, activation_list, skip=2):
+    def __init__(self, n_hidden_list, activation_list, n_input=None, skip=2):
+    # def __init__(self, n_input, n_hidden_list, activation_list, skip=2):
         super().__init__()
         if type(activation_list) is not list:
             activation_list = [activation_list]*len(n_hidden_list)
@@ -124,16 +84,24 @@ class DNN_Resnet(nn.Module):
         assert skip >= 2, 'skip needs to be: skip >= 2, given: %s'%(skip)
 
         # 1st layer
-        layers = [nn.Linear(n_input, n_hidden_list[0])]
+        if n_input is None:
+            layers = [nn.LazyLinear(n_hidden_list[0])]
+        else:
+            layers = [nn.Linear(n_input, n_hidden_list[0])]
         # Hidden layers ~ Output layer
         layers.extend([nn.Linear(n_hidden_list[i], n_hidden_list[i+1]) for i in range(len(n_hidden_list)-1)])
         self.fc = nn.ModuleList(layers)
         self.activation_list = nn.ModuleList(activation_list)
 
         # Skip layers
+        # Bias already present at original layers
         self.skip = skip
-        n_skip_hidden_list = [n_input] + [n_hidden_list[i] for i in range(skip-1, len(n_hidden_list), skip)]
-        skip_layers = ([nn.Linear(n_skip_hidden_list[i], n_skip_hidden_list[i+1], bias=False) for i in range(len(n_skip_hidden_list)-1)]) # Bias already present at original layers
+        if n_input is None:
+            n_skip_hidden_list = [n_hidden_list[i] for i in range(skip-1, len(n_hidden_list), skip)]
+            skip_layers = [nn.LazyLinear(n_skip_hidden_list[0], bias=False)] + [nn.Linear(n_skip_hidden_list[i], n_skip_hidden_list[i+1], bias=False) for i in range(len(n_skip_hidden_list)-1)]
+        else:
+            n_skip_hidden_list = [n_input] + [n_hidden_list[i] for i in range(skip-1, len(n_hidden_list), skip)]
+            skip_layers = [nn.Linear(n_skip_hidden_list[i], n_skip_hidden_list[i+1], bias=False) for i in range(len(n_skip_hidden_list)-1)]
         self.skip_layers = nn.ModuleList(skip_layers) # Need ModuleList, not list, so that the model can recognize this layers
         self.n_skip = len(n_hidden_list) // skip # number of skip layers
         # assert self.n_skip == len(self.skip_layers), 'something\'s wrong'
@@ -156,7 +124,8 @@ class DNN_Resnet(nn.Module):
     '''
 
 class DNN_Densenet(nn.Module):
-    def __init__(self, n_input, n_hidden_list, activation_list, skip=2):
+    def __init__(self, n_hidden_list, activation_list, n_input=None, skip=2):
+    # def __init__(self, n_input, n_hidden_list, activation_list, skip=2):
         super().__init__()
         if type(activation_list) is not list:
             activation_list = [activation_list]*len(n_hidden_list)
@@ -165,7 +134,10 @@ class DNN_Densenet(nn.Module):
         assert skip >= 2, 'skip needs to be: skip >= 2, given: %s'%(skip)
 
         # 1st layer
-        layers = [nn.Linear(n_input, n_hidden_list[0])]
+        if n_input is None:
+            layers = [nn.LazyLinear(n_hidden_list[0])]
+        else:
+            layers = [nn.Linear(n_input, n_hidden_list[0])]
         # Hidden layers ~ Output layer
         layers.extend([nn.Linear(n_hidden_list[i], n_hidden_list[i+1]) for i in range(len(n_hidden_list)-1)])
         self.fc = nn.ModuleList(layers)
@@ -173,11 +145,21 @@ class DNN_Densenet(nn.Module):
 
         # Skip layers
         self.skip = skip
-        n_skip_hidden_list = [n_input] + [n_hidden_list[i] for i in range(skip-1, len(n_hidden_list), skip)]
-        skip_layers = nn.ModuleDict()
-        for i in range(1, len(n_skip_hidden_list)):
-            for j in range(i):
-                skip_layers[str(j)+'_'+str(i)]=nn.Linear(n_skip_hidden_list[j], n_skip_hidden_list[i], bias=False)
+        if n_input is None:
+            n_skip_hidden_list = [None] + [n_hidden_list[i] for i in range(skip-1, len(n_hidden_list), skip)]
+            skip_layers = nn.ModuleDict()
+            for i in range(1, len(n_skip_hidden_list)):
+                for j in range(i):
+                    if j==0:
+                        skip_layers[str(j)+'_'+str(i)]=nn.LazyLinear(n_skip_hidden_list[i], bias=False)
+                    else:
+                        skip_layers[str(j)+'_'+str(i)]=nn.Linear(n_skip_hidden_list[j], n_skip_hidden_list[i], bias=False)
+        else:
+            n_skip_hidden_list = [n_input] + [n_hidden_list[i] for i in range(skip-1, len(n_hidden_list), skip)]
+            skip_layers = nn.ModuleDict()
+            for i in range(1, len(n_skip_hidden_list)):
+                for j in range(i):
+                    skip_layers[str(j)+'_'+str(i)]=nn.Linear(n_skip_hidden_list[j], n_skip_hidden_list[i], bias=False)
         self.skip_layers = skip_layers
 
         n = len(n_skip_hidden_list)-1
@@ -297,6 +279,38 @@ class CNN_Densenet(nn.Module):
                 x = activation(layer(x))
 
         return x
+
+class Gaussian(nn.Module):
+    def __init__(self, amp=1, mu=0, sigma=1):
+        super().__init__()
+        self.register_parameter('mu', nn.Parameter(torch.tensor(mu, dtype=torch.float)))
+        self.register_parameter('sigma', nn.Parameter(torch.tensor(sigma, dtype=torch.float)))
+        self.register_parameter('amp', nn.Parameter(torch.tensor(amp, dtype=torch.float)))
+
+    def forward(self, x):
+        return self.amp/(self.sigma*np.sqrt(2*np.pi))*torch.exp(-0.5*((x-self.mu)/self.sigma)**2)
+
+class SimpleGaussian(nn.Module):
+    def __init__(self, amp=1, mu=0, sigma=1):
+        super().__init__()
+        self.register_parameter('mu', nn.Parameter(torch.tensor(mu, dtype=torch.float)))
+        self.register_parameter('sigma', nn.Parameter(torch.tensor(sigma, dtype=torch.float)))
+        self.register_parameter('amp', nn.Parameter(torch.tensor(amp, dtype=torch.float)))
+
+    def forward(self, x):
+        return self.amp*torch.exp(-0.5*((x-self.mu)/self.sigma)**2)
+
+class Residual(nn.Module):
+    def __init__(self, block, n_repeat, activation = nn.ReLU()):
+        super().__init__()
+        blocks = [block() for i in range(n_repeat)]
+        self.blocks = blocks
+        self.activation = activation
+
+    def forward(self, x):
+        for block in self.blocks:
+            x = self.activation(block(x)+x)
+        return
 
 class Parallel(nn.Module):
     def __init__(self, *args):

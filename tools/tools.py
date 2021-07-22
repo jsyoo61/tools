@@ -9,6 +9,8 @@ import yaml
 import matplotlib.pyplot as plt
 import numpy as np
 
+from .array import *
+
 __all__ = \
 ['AverageMeter',
  'Filename',
@@ -25,6 +27,7 @@ __all__ = \
  'isint',
  'load_pickle',
  'now',
+ 'reverse_dict',
  'unnest_dict',
  'nestdict_to_list',
  'update_ld',
@@ -86,6 +89,12 @@ def equal(lst):
         return True
     else:
         return all([lst[0]==value for value in lst[1:]])
+
+def reverse_dict(d):
+    d_ = {}
+    for k, v in d.items():
+        d_[v]=k
+    return d_
 
 def unnest_dict(d):
     '''Unnest nested dictionary.
@@ -250,6 +259,7 @@ class Path(str):
     ----------
     path: str (default: '.')
         Notes the default path. Leave for default blank value which means the current working directory.
+        So YOU MUST NOT USE "path" ATTRIBUTE, WHERE THIS WILL MESS UP EVERYTHING
 
     Example
     -------
@@ -298,6 +308,7 @@ class Path(str):
     def __setattr__(self, key, value):
         # super(Path, self).__setattr__(key, self / value) # self.joinpath(value)
         if hasattr(self, 'path'):
+            assert key != 'path', '"path" is a predefined attribute and must not be used. Use some other attribute name'
             super(Path, self).__setattr__(key, Path(os.path.join(self.path, value)))
         else:
             super(Path, self).__setattr__(key, value)
@@ -322,6 +333,9 @@ class Path(str):
         '''Delete all files and directories in current directory'''
         for directory in self.__dict__.values():
             shutil.rmtree(directory, ignore_errors=ignore_errors)
+
+    def listdir(self):
+        return os.listdir(self.path)
 
 
 class TDict(dict):
@@ -508,3 +522,14 @@ class ValueTracker(object):
         ax.plot(x, y, color=color, alpha=0.4)
         ax.plot(x, y_smooth, color=color)
         return ax
+
+class Wrapper:
+        def __repr__(self):
+            name = '<wrapper>\n'
+            args = 'args: '+' '.join(str(self.args))+'\n'
+            kwargs = 'kwargs: '+str(self.kwargs)
+            return name+args+kwargs
+
+        def __init__(self, *args, **kwargs):
+            self.args = args
+            self.kwargs = T.TDict(kwargs)
