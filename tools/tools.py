@@ -96,7 +96,7 @@ def reverse_dict(d):
         d_[v]=k
     return d_
 
-def unnest_dict(d):
+def unnest_dict(d, format='.'):
     '''Unnest nested dictionary.
     Nested keys are concatenated with "." notation.
     '''
@@ -106,7 +106,7 @@ def unnest_dict(d):
         if type(v)==dict:
             un_d_ = unnest_dict(v)
             for k_, v_ in un_d_.items():
-                un_d[str(k)+'.'+str(k_)] = v_
+                un_d[str(k)+format+str(k_)] = v_
         else:
             un_d[k] = v
     return un_d
