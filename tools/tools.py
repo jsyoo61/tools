@@ -6,8 +6,8 @@ import subprocess
 import time
 import yaml
 
-import matplotlib.pyplot as plt
-import numpy as np
+# import matplotlib.pyplot as plt
+# import numpy as np
 
 from .array import *
 
@@ -18,10 +18,11 @@ __all__ = \
  'TDict',
  'Timer',
  'Path',
- 'ValueTracker',
  'append',
  'cmd',
  'equal',
+ 'iseven',
+ 'isodd',
  'is_iterable',
  'isnumeric',
  'isint',
@@ -33,13 +34,12 @@ __all__ = \
  'update_ld',
  'merge_dict',
  'prettify_dict',
- 'print_dict',
  'read',
  'readline',
  'readlines',
  'save_pickle',
  'str2bool',
- 'strisfloat',
+ # 'strisfloat',
  'write']
 
 def save_pickle(obj: str, path: str = None):
@@ -85,20 +85,51 @@ def cmd(command: str):
     return pipe.stdout
 
 def equal(lst):
-    if len(lst)<=1:
-        return True
-    else:
-        return all([lst[0]==value for value in lst[1:]])
+    '''return True if all elements in iterable is equal'''
+    lst_inst = iter(lst)
+    val = next(lst_inst)
+    for v in lst_inst:
+        if v!=val:
+            return False
+    return True
+
+    # DEPRECATED: inefficient.
+    # if len(lst)<=1:
+    #     return True
+    # else:
+    #     return all([lst[0]==value for value in lst[1:]])
+
+def iseven(i):
+    return i%2==0
+
+def isodd(i):
+    return i%2==1
 
 def reverse_dict(d):
+    '''
+    Reverse key:value pair of dict into value:key.
+    Thus, values in dict must be hashable
+    '''
     d_ = {}
     for k, v in d.items():
         d_[v]=k
     return d_
 
 def unnest_dict(d, format='.'):
-    '''Unnest nested dictionary.
+    '''
+    Unnest nested dictionary.
     Nested keys are concatenated with "." notation.
+
+    ex)
+    >>> rating = {'witcher': {'bombs': 5, 'swords': 7}, 'gta': {'guns': 5}, 'lol': {'magic': 5, 'skills': 3}}
+    >>> unnest_dict(rating, format='.')
+    {
+    'witcher.bombs': 5,
+    'witcher.swords': 7,
+    'gta.guns': 5,
+    'lol.magic': 5,
+    'lol.skills': 3
+    }
     '''
     un_d = {}
     # d = d.copy()
@@ -137,7 +168,7 @@ def update_ld(ld, d):
 
 def merge_dict(ld):
     '''merge list of dicts
-    dict of lists
+    into dict of lists
     ld: list of dicts'''
 
     keys = ld[0].keys()
@@ -146,6 +177,17 @@ def merge_dict(ld):
         pass
 
     return d
+
+def pprint_dict(d, **kwargs):
+    '''prettify long dictionary
+    Example
+    -------
+    >>> d = {'a':1, 'b':2, 'c':3}
+    >>> print_dict(d)
+
+    '''
+
+    return yaml.dump(d, **kwargs)
 
 def prettify_dict(dictionary, indent=0):
     return '\n'.join([' '*indent + str(k) +': '+str(v) if type(v)!=dict else str(k)+':\n'+prettify_dict(v, indent=indent+2) for k, v in dictionary.items()])
@@ -161,12 +203,13 @@ def str2bool(x):
     else:
         raise Exception('input has to be in one of two forms:\nTrue: %s\nFalse: %s'%(true_list, false_list))
 
-def strisfloat(x):
-    try:
-        x=float(x)
-        return True
-    except ValueError:
-        return False
+# DEPRECATED: use str.isnumeric()
+# def strisfloat(x):
+#     try:
+#         x=float(x)
+#         return True
+#     except ValueError:
+#         return False
 
 def isnumeric(x):
     try:
@@ -185,10 +228,6 @@ def isint(x):
 def is_iterable(x):
     return hasattr(x, '__iter__')
 
-def is_equal(x):
-    '''returns True if all elements in the iterable is equal'''
-    pass
-
 def now(format: str ='-'):
     if format=='-':
         return time.strftime('%Y-%m-%d_%H-%M-%S')
@@ -196,17 +235,6 @@ def now(format: str ='-'):
         return time.strftime('%y%m%d_%H%M%S')
     else:
         raise Exception("format has to be one of ['-', '_']")
-
-def print_dict(d, **kwargs):
-    '''prettify long dictionary
-    Example
-    -------
-    >>> d = {'a':1, 'b':2, 'c':3}
-    >>> print_dict(d)
-
-    '''
-
-    return yaml.dumps(d, **kwargs)
 
 class Filename():
     '''(Will be deprecated since Path() can be used)
@@ -290,7 +318,7 @@ class Path(str):
         self.path=path
 
     def __repr__(self):
-        return self.path
+        return f'Path({self.path})'
 
 
     def __call__(self):
@@ -334,8 +362,11 @@ class Path(str):
         for directory in self.__dict__.values():
             shutil.rmtree(directory, ignore_errors=ignore_errors)
 
-    def listdir(self):
-        return os.listdir(self.path)
+    def listdir(self, join=False):
+        if join:
+            return [os.path.join(self.path, p) for p in os.listdir(self.path)]
+        else:
+            return os.listdir(self.path)
 
 
 class TDict(dict):
@@ -461,67 +492,6 @@ class AverageMeter(object):
         self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count
-
-class ValueTracker(object):
-    """ ValueTracker."""
-
-    def __repr__(self):
-        return f'<ValueTracker>\nx: {self.x}\ny: {self.y}'
-
-    def __init__(self):
-        self.reset()
-
-    def __iadd__(self, other):
-        self.x.extend(other.x)
-        self.y.extend(other.y)
-        self.label.extend(other.label)
-        self.n_step += len(other.x)
-        return self
-
-    def __add__(self, other):
-        self = deepcopy(self)
-        self.x.extend(other.x)
-        self.y.extend(other.y)
-        self.label.extend(other.label)
-        self.n_step += len(other.x)
-        return self
-
-    def reset(self):
-        self.x = []
-        self.y = []
-        self.label = []
-        self.n_step = 0
-
-    def numpy(self):
-        return np.array(self.x), np.array(self.y), np.array(self.label)
-
-    def step(self, x, y, label=None):
-        if hasattr(x, '__len__'):
-            assert hasattr(y, '__len__')
-            assert len(x)==len(y)
-            self.x.extend(x)
-            self.y.extend(y)
-            if label != None:
-                assert len(y)==len(label)
-                self.label.extend(label)
-            self.n_step += len(x)
-
-        else:
-            self.x.append(x)
-            self.y.append(y)
-            if label != None:
-                self.label.append(label)
-            self.n_step += 1
-
-    def plot(self, w=9, color='tab:blue', ax=None):
-        x = np.array(self.x)
-        y = np.array(self.y)
-        y_smooth = moving_mean(y, w)
-        if ax==None:
-            ax = plt.gca()
-        ax.plot(x, y, color=color, alpha=0.4)
-        ax.plot(x, y_smooth, color=color)
-        return ax
 
 class Wrapper:
         def __repr__(self):

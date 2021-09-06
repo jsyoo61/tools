@@ -1,8 +1,9 @@
 
-__version__ = "2021.07.23.0"
+__version__ = "2021.09.06.0"
 # from . import tools, data, my_random
 from .tools import *
-from . import my_random, os
+from . import os
+# from . import my_random as random
 
 '''
 For third-party packages, import manually by something like:

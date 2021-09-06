@@ -3,7 +3,9 @@ import numpy as np
 # %%
 __all__ = [
 'standardize',
+'binarize',
 'moving_mean',
+'angle',
 ]
 
 # %%
@@ -29,6 +31,19 @@ def moving_mean(x, w):
         x = (x[w:] - x[:-w])/w
         return x
 
+def angle(x1, x2):
+    '''angle between two vectors, derived from cosine rule
+    return theta within range of [0,np.pi]'''
+    theta = np.arccos(x1@x2/(np.linalg.norm(x1)*np.linalg.norm(x2)))
+    return theta
+
+def sigmoid(x):
+    return 1/(1+np.exp(-x))
+
 # %%
 if __name__ == '__main__':
     pass
+
+    import numpy as np
+    x1=np.array([0,0,1])
+    x2=np.array([1,0,0])

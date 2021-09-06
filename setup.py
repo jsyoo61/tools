@@ -1,3 +1,6 @@
+from tools import __version__
+print(f'Installing tools@{__version__}')
+
 import setuptools
 
 with open("README.md", "r") as fh:
@@ -5,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="tools-jsyoo61", # Replace with your own username
-    version="2021.07.23.0",
+    version=__version__,
     author="JaeSung Yoo",
     author_email="jsyoo61@korea.ac.kr",
     description="personal syntax tool",

@@ -1,3 +1,4 @@
+from copy import deepcopy as dcopy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -27,13 +28,13 @@ class DNN(nn.Module):
         (4): Linear(in_features=6, out_features=5, bias=True)
         (5): Tanh()
       )
-    )-
+    )
     '''
     def __init__(self, n_hidden_list, activation_list, n_input=None):
     # def __init__(self, n_input, n_hidden_list, activation_list):
         super().__init__()
         if type(activation_list) is not list:
-            activation_list = [activation_list]*len(n_hidden_list)
+            activation_list = [dcopy(activation_list)]*len(n_hidden_list)
         assert len(activation_list)==len(n_hidden_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
 
         # 1st layer - Select Lazy if n_input is not specified
@@ -78,7 +79,7 @@ class DNN_Resnet(nn.Module):
     # def __init__(self, n_input, n_hidden_list, activation_list, skip=2):
         super().__init__()
         if type(activation_list) is not list:
-            activation_list = [activation_list]*len(n_hidden_list)
+            activation_list = [dcopy(activation_list)]*len(n_hidden_list)
         assert len(activation_list)==len(n_hidden_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
         assert len(n_hidden_list) >= skip, 'number of layers must be equal or greater than skip. len(n_hidden_list): %s, skip: %s'%(len(n_hidden_list), skip)
         assert skip >= 2, 'skip needs to be: skip >= 2, given: %s'%(skip)
@@ -128,7 +129,7 @@ class DNN_Densenet(nn.Module):
     # def __init__(self, n_input, n_hidden_list, activation_list, skip=2):
         super().__init__()
         if type(activation_list) is not list:
-            activation_list = [activation_list]*len(n_hidden_list)
+            activation_list = [dcopy(activation_list)]*len(n_hidden_list)
         assert len(activation_list)==len(n_hidden_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
         assert len(n_hidden_list) >= skip, 'number of layers must be equal or greater than skip. len(n_hidden_list): %s, skip: %s'%(len(n_hidden_list), skip)
         assert skip >= 2, 'skip needs to be: skip >= 2, given: %s'%(skip)
@@ -185,7 +186,7 @@ class CNN(nn.Module):
     def __init__(self, in_channel, n_channel_list, activation_list, kernel_size=3):
         super().__init__()
         if type(activation_list) is not list:
-            activation_list = [activation_list]*len(n_channel_list)
+            activation_list = [dcopy(activation_list)]*len(n_channel_list)
         assert len(activation_list)==len(n_channel_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
 
         # 1st layer
@@ -203,7 +204,7 @@ class CNN_Resnet(nn.Module):
     def __init__(self, in_channel, n_channel_list, activation_list, kernel_size=3, skip=2):
         super().__init__()
         if type(activation_list) is not list:
-            activation_list = [activation_list]*len(n_channel_list)
+            activation_list = [dcopy(activation_list)]*len(n_channel_list)
         assert len(activation_list)==len(n_channel_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
         assert kernel_size % 2 == 1, f'kernel size must be odd number, Got: ({kernel_size})'
 
@@ -239,7 +240,7 @@ class CNN_Densenet(nn.Module):
     def __init__(self, in_channel, n_channel_list, activation_list, kernel_size=3, skip=2):
         super().__init__()
         if type(activation_list) is not list:
-            activation_list = [activation_list]*len(n_channel_list)
+            activation_list = [dcopy(activation_list)]*len(n_channel_list)
         assert len(activation_list)==len(n_channel_list), 'length of layers and activations must match. If you want no activation, use nn.Identity'
         assert kernel_size % 2 == 1, f'kernel size must be odd number, Got: ({kernel_size})'
 
@@ -301,15 +302,17 @@ class SimpleGaussian(nn.Module):
         return self.amp*torch.exp(-0.5*((x-self.mu)/self.sigma)**2)
 
 class Residual(nn.Module):
-    def __init__(self, block, n_repeat, activation = nn.ReLU()):
+    # def __init__(self, block, n_repeat, activation = nn.ReLU()):
+    def __init__(self, block, n_repeat):
         super().__init__()
         blocks = [block() for i in range(n_repeat)]
         self.blocks = blocks
-        self.activation = activation
+        # self.activation = activation
 
     def forward(self, x):
         for block in self.blocks:
-            x = self.activation(block(x)+x)
+            # x = self.activation(block(x)+x)
+            x = block(x)+x
         return
 
 class Parallel(nn.Module):

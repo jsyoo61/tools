@@ -9,9 +9,10 @@ jsyoo61@korea.ac.kr
     import tools as T
     T.save_pickle(data, 'data.p')
     data = T.load_pickle('data.p')
-    
+
 Most useful functions are in `tools.tools`\
 API dependent tools are in their corresponding folders: `tools.API_name` (i.e. `tools.torch.optim`)
+Not documented yet, so you'll have to look at documents written inside the codes. (Most codes contain explanation)
 
 `scripts/` folder is not included in pip. It's just a copy-paste format
 
