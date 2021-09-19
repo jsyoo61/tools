@@ -6,11 +6,6 @@ import subprocess
 import time
 import yaml
 
-# import matplotlib.pyplot as plt
-# import numpy as np
-
-from .array import *
-
 __all__ = \
 ['AverageMeter',
  'Filename',
