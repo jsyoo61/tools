@@ -7,19 +7,21 @@ __all__ = [
 'confusion_matrix'
 ]
 
-def plot_confusion_matrix(y_true, y_pred):
+def plot_confusion_matrix(y_true, y_pred, ax=None, **kwargs):
     '''Just a wrapper to generate the confusion matrix and the plot'''
-    c_matrix = confusion_matrix(y_true, y_pred)
-    return return confusion_matrix(c_matrix)
+    c_matrix = metrics.confusion_matrix(y_true, y_pred)
+    return confusion_matrix(c_matrix, ax=ax)
 
-def confusion_matrix(c_matrix):
+def confusion_matrix(c_matrix, ax=None, **kwargs):
     '''Plot confusion matrix heatmap'''
     df_cm = pd.DataFrame(c_matrix)
-    fig = plt.figure()
-    ax = sns.heatmap(df_cm, annot=True)
+    if ax is None:
+        ax = sns.heatmap(df_cm, annot=True, **kwargs)
+    else:
+        ax = sns.heatmap(df_cm, annot=True, ax=ax, **kwargs)
     ax.set_ylabel('y_true')
     ax.set_xlabel('y_pred')
-    return fig, ax
+    return ax
 
 if __name__ == '__main__':
     pass

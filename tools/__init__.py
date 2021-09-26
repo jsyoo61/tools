@@ -1,5 +1,5 @@
 
-__version__ = "2021.09.25.3"
+__version__ = "2021.09.26.1"
 # from . import tools, data, my_random
 from .tools import *
 from . import os
