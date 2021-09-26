@@ -1,10 +1,12 @@
 from copy import deepcopy as dcopy
-import os as os
+import os
 from pathlib import Path as P
 import pickle
 import subprocess
 import time
 import yaml
+
+from . import os as _os
 
 __all__ = \
 ['AverageMeter',
@@ -34,7 +36,6 @@ __all__ = \
  'readlines',
  'save_pickle',
  'str2bool',
- # 'strisfloat',
  'write']
 
 def save_pickle(obj: str, path: str = None):
@@ -82,7 +83,11 @@ def cmd(command: str):
 def equal(lst):
     '''return True if all elements in iterable is equal'''
     lst_inst = iter(lst)
-    val = next(lst_inst)
+    try:
+        val = next(lst_inst)
+    except StopIteration:
+        return True
+
     for v in lst_inst:
         if v!=val:
             return False
@@ -189,6 +194,11 @@ def prettify_dict(dictionary, indent=0):
 
 # Used in Argparse
 def str2bool(x):
+    try:
+        return bool(x)
+    except:
+        pass
+
     true_list = ['t', 'true', 'y', 'yes', '1']
     false_list = ['f', 'false', 'n', 'no', '0']
     if x.lower() in true_list:
@@ -357,11 +367,14 @@ class Path(str):
         for directory in self.__dict__.values():
             shutil.rmtree(directory, ignore_errors=ignore_errors)
 
-    def listdir(self, join=False):
-        if join:
-            return [os.path.join(self.path, p) for p in os.listdir(self.path)]
+    def listdir(self, join=False, isdir=False, isfile=False):
+        if isdir or isfile:
+            return _os.listdir(self.path, join=join, isdir=isdir, isfile=isfile)
         else:
-            return os.listdir(self.path)
+            if join:
+                return [os.path.join(self.path, p) for p in os.listdir(self.path)]
+            else:
+                return os.listdir(self.path)
 
 
 class TDict(dict):

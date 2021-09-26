@@ -1,12 +1,12 @@
 import os
-
+from typing import Union
 __all__ = \
 ['listdir']
 
 def makedirs(path, exist_ok=True):
     os.makedirs(path, exist_ok=exist_ok)
 
-def listdir(path=None, isdir=False, isfile=False, join=False):
+def listdir(path=None, isdir: bool=False, isfile: Union[bool, str]=False, join: bool=False):
     '''
     :func listdir:
 
@@ -23,12 +23,17 @@ def listdir(path=None, isdir=False, isfile=False, join=False):
         isfile = True
     else:
         isfile_str=False
+    # assert type(isfile)==str or type(isfile)==bool, 'isfile can be either str or bool'
+    # _isfile = True if type(isfile)==str else isfile
     assert not (isdir and isfile), 'only one of argument "isdir" and "isfile" can be True'
-    if path == None:
-        path = '.'
+    # if path == None:
+    #     path = '.'
 
     dir_list = os.listdir(path)
-    dir_list_joined = [os.path.join(path, dir) for dir in dir_list]
+
+    # skip this variable if unnecessary
+    if join or isdir or isfile:
+        dir_list_joined = dir_list if path is None else [os.path.join(path, dir) for dir in dir_list]
 
     if join:
         dir_list = dir_list_joined
@@ -43,7 +48,6 @@ def listdir(path=None, isdir=False, isfile=False, join=False):
             return [dir for dir, dir_joined in zip(dir_list, dir_list_joined) if os.path.isfile(dir_joined)]
     else:
         return dir_list
-
 
 # if __name__ == '__main__':
 #     listdir('torch', isdir=False, join=False)
