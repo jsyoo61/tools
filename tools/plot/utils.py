@@ -1,11 +1,14 @@
-import logging
+# import logging
+import os
+import warnings
 
 import numpy as np
 
-log = logging.getLogger(__name__)
+# log = logging.getLogger(__name__)
 
 __all__ = [
-'confusion_matrix'
+'get_xtick_seconds',
+'multisave',
 ]
 
 # %%
@@ -28,8 +31,8 @@ def multisave(fig, path):
     :param path: path of the figure without extension (.extension)
     '''
     if '.' in os.path.basename(path):
-        log.warning("Do not specify '.' in name. assuming it's part of the filename...")
-        
+        warnings.warn("Do not specify '.' in name. assuming it's part of the filename...")
+
         # log.warning('Do not specify extension in multisave(). Removing extension...')
         # path = os.path.splitext(path)[0]
 

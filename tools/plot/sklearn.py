@@ -4,7 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 __all__ = [
-'confusion_matrix'
+'confusion_matrix',
+'plot_confusion_matrix',
 ]
 
 def plot_confusion_matrix(y_true, y_pred, ax=None, **kwargs):

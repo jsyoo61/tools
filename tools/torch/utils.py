@@ -1,4 +1,13 @@
 import torch
+import multiprocessing
+
+__all__ = [
+'get_device',
+'multiprocessing_device',
+'nanparam',
+'nangrad',
+'param_same',
+]
 
 def get_device(model):
     return next(model.parameters()).device
@@ -13,19 +22,24 @@ def spread_device(job_num = None):
 
 def multiprocessing_device(gpu_id = None):
     '''
-    if gpu_id
+    device setting for hydra multiprocessing
     '''
     if gpu_id == -1 or not torch.cuda.is_available():
-        return torch.device('cpu')
+        device = torch.device('cpu')
     else:
         if gpu_id == None:
+            # use distributed device, or default device
             p=multiprocessing.current_process()
+            #
             try:
                 worker_num = int(p.name.split('-')[-1]) # Fails if it's not integer
                 gpu_id = worker_num % torch.cuda.device_count()
-                return torch.device(f"cuda:{gpu_id}")
+                device = torch.device(f"cuda:{gpu_id}")
             except ValueError: # Parent process
-                return torch.cuda.default_stream().device
+                device = torch.cuda.default_stream().device
+        else:
+            device = torch.device(f'cuda:{gpu_id}')
+    return device
 
 def nanparam(model):
     for p in model.parameters():
