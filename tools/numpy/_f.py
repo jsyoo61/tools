@@ -2,13 +2,27 @@ import numpy as np
 
 # %%
 __all__ = [
-'standardize',
-'binarize',
-'moving_mean',
 'angle',
+'binarize',
+'ceil',
+'floor',
+'moving_mean',
+'standardize',
 ]
 
 # %%
+def floor(x, decimals=0):
+    if decimals==0:
+        return np.floor(x)
+    else:
+        return np.floor(x * 10**decimals) / 10**decimals
+
+def ceil(x, decimals=0):
+    if decimals==0:
+        return np.ceil(x)
+    else:
+        return np.ceil(x * 10**decimals) / 10**decimals
+
 def standardize(array, axis=None, ep=1e-20):
     return (array - array.mean(axis=axis))/(array.std(axis=axis)+ep)
 
