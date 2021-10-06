@@ -1,7 +1,10 @@
 import os
 from typing import Union
 __all__ = \
-['listdir']
+[
+'listdir',
+'makedirs'
+]
 
 def makedirs(path, exist_ok=True):
     os.makedirs(path, exist_ok=exist_ok)

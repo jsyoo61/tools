@@ -57,7 +57,3 @@ def sigmoid(x):
 # %%
 if __name__ == '__main__':
     pass
-
-    import numpy as np
-    x1=np.array([0,0,1])
-    x2=np.array([1,0,0])
