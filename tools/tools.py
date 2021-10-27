@@ -9,8 +9,7 @@ import yaml
 from . import os as _os
 
 __all__ = \
-['AverageMeter',
- 'Filename',
+['Filename',
  'Printer',
  'TDict',
  'Timer',
@@ -476,38 +475,14 @@ class Timer():
     def reset(self):
         self.elapsed_time = 0
 
-class AverageMeter(object):
-    """Computes and stores the average and current value
-    Variables
-    ---------
-    self.val
-    self.avg
-    self.sum
-    self.count
-    """
-
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.val = 0
-        self.avg = 0
-        self.sum = 0
-        self.count = 0
-
-    def step(self, val, n=1):
-        self.val = val
-        self.sum += val * n
-        self.count += n
-        self.avg = self.sum / self.count
 
 class Wrapper:
-        def __repr__(self):
-            name = '<wrapper>\n'
-            args = 'args: '+' '.join(str(self.args))+'\n'
-            kwargs = 'kwargs: '+str(self.kwargs)
-            return name+args+kwargs
+    def __repr__(self):
+        name = '<wrapper>\n'
+        args = 'args: '+' '.join(str(self.args))+'\n'
+        kwargs = 'kwargs: '+str(self.kwargs)
+        return name+args+kwargs
 
-        def __init__(self, *args, **kwargs):
-            self.args = args
-            self.kwargs = T.TDict(kwargs)
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = T.TDict(kwargs)

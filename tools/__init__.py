@@ -1,9 +1,7 @@
 
-__version__ = "2021.10.3.1"
-# from . import tools, data, my_random
+__version__ = "2021.10.26.2"
 from .tools import *
 from . import os
-# from . import my_random as random
 
 '''
 For third-party packages, import manually by something like:
@@ -12,3 +10,5 @@ import tools.pytorch as tpytorch
 import tools.pytorch as tpt
 import tools.pytorch as Tpt
 '''
+
+# TODO: make animator in plot/

@@ -59,3 +59,9 @@ def param_same(model1, model2):
         if not same:
             return False
     return True
+
+def print_rng_state(n=10, nonzero=True):
+    rngs = torch.random.get_rng_state().numpy().tolist()
+    if nonzero:
+        rngs = [i for i in rngs if i != 0]
+    print(rngs[:n])

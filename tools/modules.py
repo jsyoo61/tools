@@ -62,3 +62,28 @@ class ValueTracker(object):
         ax.plot(x, y, color=color, alpha=0.4)
         ax.plot(x, y_smooth, color=color)
         return ax
+
+class AverageMeter(object):
+    """Computes and stores the average and current value
+    Variables
+    ---------
+    self.val
+    self.avg
+    self.sum
+    self.count
+    """
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def step(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count

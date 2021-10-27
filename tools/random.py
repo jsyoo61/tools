@@ -1,6 +1,9 @@
+import random
+
 import numpy as np
 import torch
 
+# %%
 def choice(a, size=None, replace=True):
     '''
     Randomly choose elements from given iterable.
@@ -32,6 +35,9 @@ def choice(a, size=None, replace=True):
         return a[random_i].reshape(size)
 
 def seed(random_seed, strict=False):
+    '''
+    
+    '''
     np.random.seed(random_seed)
     torch.manual_seed(random_seed)
 

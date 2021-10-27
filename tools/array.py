@@ -2,6 +2,8 @@ import numpy as np
 import torch
 import tools as T
 
+
+# TODO: change name mangic_cat() -> concat()
 __all__ = [
 'magic_cat',
 ]
