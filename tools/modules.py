@@ -72,6 +72,7 @@ class AverageMeter(object):
     self.sum
     self.count
     """
+    # TODO: maybe keep track of each values? or just merge with valuetracker?
 
     def __init__(self):
         self.reset()

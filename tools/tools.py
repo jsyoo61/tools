@@ -1,5 +1,6 @@
 from copy import deepcopy as dcopy
 import os
+import warnings
 from pathlib import Path as P
 import pickle
 import subprocess
@@ -29,6 +30,7 @@ __all__ = \
  'nestdict_to_list',
  'update_ld',
  'merge_dict',
+ # 'pprint_dict',
  'prettify_dict',
  'read',
  'readline',
@@ -91,12 +93,6 @@ def equal(lst):
         if v!=val:
             return False
     return True
-
-    # DEPRECATED: inefficient.
-    # if len(lst)<=1:
-    #     return True
-    # else:
-    #     return all([lst[0]==value for value in lst[1:]])
 
 def iseven(i):
     return i%2==0
@@ -177,17 +173,21 @@ def merge_dict(ld):
 
     return d
 
-def pprint_dict(d, **kwargs):
-    '''prettify long dictionary
-    Example
-    -------
-    >>> d = {'a':1, 'b':2, 'c':3}
-    >>> print_dict(d)
-
-    '''
-
-    return yaml.dump(d, **kwargs)
-
+# def prettify_dict(d, print_type='yaml', **kwargs):
+#     '''prettify long dictionary
+#     Example
+#     -------
+#     >>> d = {'a':1, 'b':2, 'c':3}
+#     >>> print_dict(d)
+#
+#     '''
+#     if print_type == 'yaml':
+#         return yaml.dump(d, **kwargs)
+#     elif print_type=='pprint':
+#         pp = pprint.PrettyPrinter()
+#         return pp.pformat(info_basic)
+#     else:
+#         pass
 def prettify_dict(dictionary, indent=0):
     return '\n'.join([' '*indent + str(k) +': '+str(v) if type(v)!=dict else str(k)+':\n'+prettify_dict(v, indent=indent+2) for k, v in dictionary.items()])
 
@@ -472,9 +472,14 @@ class Timer():
         if self.return_f:
             return self.elapsed_time
 
+    def elapsed(self):
+        if self.running:
+            return time.time() - self.start_time
+        else:
+            warnings.warn('timer is not running. call start() first')
+
     def reset(self):
         self.elapsed_time = 0
-
 
 class Wrapper:
     def __repr__(self):
