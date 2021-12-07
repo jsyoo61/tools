@@ -18,6 +18,7 @@ __all__ = \
  'append',
  'cmd',
  'equal',
+ 'equal_set',
  'iseven',
  'isodd',
  'is_iterable',
@@ -44,6 +45,7 @@ def save_pickle(obj: str, path: str = None):
     If path is not given, default to "YearMonthDay_HourMinuteSecond.p" '''
     if path == None:
         path = time.strftime('%y%m%d_%H%M%S.p')
+        warnings.warn(f'Be sure to specify specify argument "path"!, saving as {path}...')
     with open(path, 'wb') as f:
         pickle.dump(obj, f)
 
@@ -77,7 +79,7 @@ def readlines(path, encoding = None):
     return text
 
 def cmd(command: str):
-    '''Run shell command'''
+    '''Run shell command and return stdout'''
     pipe = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
     return pipe.stdout
 
@@ -93,6 +95,10 @@ def equal(lst):
         if v!=val:
             return False
     return True
+
+def equal_set(*args):
+    '''return True if each element in args has the same set content'''
+    return equal([set(elem) for elem in args])
 
 def iseven(i):
     return i%2==0
@@ -113,7 +119,7 @@ def reverse_dict(d):
 def unnest_dict(d, format='.'):
     '''
     Unnest nested dictionary.
-    Nested keys are concatenated with "." notation.
+    Nested keys are concatenated with "format"(defaults with ".") notation.
 
     ex)
     >>> rating = {'witcher': {'bombs': 5, 'swords': 7}, 'gta': {'guns': 5}, 'lol': {'magic': 5, 'skills': 3}}
@@ -141,6 +147,7 @@ def nestdict_to_list(d, key=None):
     '''
     open 2nd order nested dict to list of dicts.
     If key is given, then key of the 1st order dict will be merged to the dicts as "key: 1st_key"
+    If key is None, then the key of 1st order dict will be discarded.
     '''
     l = []
     for k, v in d.items():
@@ -291,7 +298,7 @@ class Path(str):
     ----------
     path: str (default: '.')
         Notes the default path. Leave for default blank value which means the current working directory.
-        So YOU MUST NOT USE "path" ATTRIBUTE, WHERE THIS WILL MESS UP EVERYTHING
+        So YOU MUST NOT USE "path" AS ATTRIBUTE NAME, WHICH WILL MESS UP EVERYTHING
 
     Example
     -------
@@ -375,7 +382,6 @@ class Path(str):
             else:
                 return os.listdir(self.path)
 
-
 class TDict(dict):
     '''
     Dictionary which can get items via attribute notation (class.attribute)
@@ -419,7 +425,8 @@ class Printer():
         self.content = ''
 
 class Timer():
-    '''Timer to measure elapsed time
+    '''
+    Timer to measure elapsed time
 
     Parameters
     ----------
