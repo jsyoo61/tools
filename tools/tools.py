@@ -15,10 +15,12 @@ __all__ = \
  'TDict',
  'Timer',
  'Path',
+ 'Wrapper',
  'append',
  'cmd',
  'equal',
  'equal_set',
+ 'equal_array',
  'iseven',
  'isodd',
  'is_iterable',
@@ -99,6 +101,19 @@ def equal(lst):
 def equal_set(*args):
     '''return True if each element in args has the same set content'''
     return equal([set(elem) for elem in args])
+
+def equal_array(lst):
+    '''return True if all elements in array are equal'''
+    lst_inst = iter(lst)
+    try:
+        val = next(lst_inst)
+    except StopIteration:
+        return True
+
+    for arr in lst_inst:
+        if (arr!=val).any():
+            return False
+    return True
 
 def iseven(i):
     return i%2==0
