@@ -27,6 +27,7 @@ def standardize(array, axis=None, ep=1e-20):
     return (array - array.mean(axis=axis))/(array.std(axis=axis)+ep)
 
 def binarize(array, threshold):
+    '''binarize array with array>=threshold == 1'''
     result = np.zeros_like(array)
     result[array>=threshold] = 1
     return result

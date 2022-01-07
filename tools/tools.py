@@ -32,6 +32,7 @@ __all__ = \
  'unnest_dict',
  'nestdict_to_list',
  'update_ld',
+ 'update_keys',
  'merge_dict',
  # 'pprint_dict',
  'prettify_dict',
@@ -183,17 +184,24 @@ def update_ld(ld, d):
 
     return ld
 
+def update_keys(d, d_key, copy=True): # inplace? copy?
+    if copy:
+        d = dcopy(d)
+    for k_old, k_new in d_key.items():
+        d[k_new] = d.pop(k_old)
+    return d
+
 def merge_dict(ld):
     '''merge list of dicts
     into dict of lists
     ld: list of dicts'''
 
-    keys = ld[0].keys()
-    d = {key:[] for key in keys}
-    for d_ in ld:
-        pass
-
-    return d
+    keys = sorted(list(set([d.keys() for d in ld])))
+    d_merged = {key:[] for key in keys}
+    for d in ld:
+        for k, v in d.items():
+            d_merged[k].append(v)
+    return d_merged
 
 # def prettify_dict(d, print_type='yaml', **kwargs):
 #     '''prettify long dictionary
@@ -307,7 +315,7 @@ class Filename():
 class Path(str):
     '''
     Joins paths by . syntax
-    Use pathlib.Path internally
+    (Want to use pathlib.Path internally, but currently inherit from str)
 
     Parameters
     ----------
@@ -346,14 +354,13 @@ class Path(str):
     def __repr__(self):
         return f'Path({self.path})'
 
-
-    def __call__(self):
+    def __call__(self, indent=0):
         '''Print out current path, and children'''
         for name, directory in self.__dict__.items():
             if name != 'path':
-                print(name+': '+str(directory))
+                print(' '*indent+name+': '+str(directory))
                 if type(directory) == Path:
-                    directory()
+                    directory(indent+2)
         # print('\n'.join([key+': '+str(value) for key, value in self.__dict__.items()]))
 
     def __str__(self):
