@@ -1,5 +1,5 @@
 from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import StratifiedShuffleSplit, ShuffleSplit, train_test_split
+from sklearn.model_selection import StratifiedShuffleSplit, ShuffleSplit, train_test_split, StratifiedKFold, KFold
 import numpy as np
 
 def stratified_train_test_split_i(y, test_size=0.15, random_state=None):
@@ -47,6 +47,21 @@ def train_val_test_split_i(y, val_size=0.15, test_size=0.15, random_state=None):
     val_i = train_val_i[val_i_]
 
     return train_i, val_i, test_i
+
+def stratified_kfold_split(y, n_splits, split_i, shuffle=True, random_state=None):
+    '''
+    return train, test indices of "split_i"-th split of "n_splits"-fold split
+    '''
+    skf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state)
+    x = np.zeros(len(y))
+    skf_ = skf.split(x, y)
+
+    for i in range(split_i):
+        next(skf_)
+    train_i, test_i = next(skf_)
+
+    return train_i, test_i
+
 # def train_val_test_split(x, val_size=0.1, test_size=0.1, random_state=None):
 #     if type(x)==int:
 #         x = np.zeros(x)

@@ -1,5 +1,8 @@
-import torch
+import random
 import multiprocessing
+
+import numpy as np
+import torch
 
 __all__ = [
 'get_device',
@@ -7,12 +10,17 @@ __all__ = [
 'nanparam',
 'nangrad',
 'param_same',
+'print_rng_state',
+'seed',
 ]
 
 def get_device(model):
     return next(model.parameters()).device
 
 def spread_device(gpu_id = None):
+    '''
+    what's this for?
+    '''
     if gpu_id != None:
         gpu_id = gpu_id % torch.cuda.device_count()
     else:
@@ -24,8 +32,10 @@ def multiprocessing_device(gpu_id = None):
     '''
     device setting for hydra multiprocessing
     '''
+    # CPU
     if gpu_id == -1 or not torch.cuda.is_available():
         device = torch.device('cpu')
+    # GPU
     else:
         if gpu_id == None:
             # use distributed device, or default device
@@ -39,6 +49,11 @@ def multiprocessing_device(gpu_id = None):
                 device = torch.cuda.default_stream().device
         else:
             device = torch.device(f'cuda:{gpu_id}')
+        torch.cuda.set_device(device)
+        torch.cuda.empty_cache()
+
+    # log.info(f'device: {device}') # integrate logging?
+
     return device
 
 def nanparam(model):
@@ -65,3 +80,21 @@ def print_rng_state(n=10, nonzero=True):
     if nonzero:
         rngs = [i for i in rngs if i != 0]
     print(rngs[:n])
+
+
+def seed(random_seed, strict=False):
+    '''
+
+    '''
+    np.random.seed(random_seed)
+    torch.manual_seed(random_seed)
+
+    if strict:
+        # Following is verbose, but just in case.
+        random.seed(random_seed)
+        torch.cuda.manual_seed(random_seed)
+        torch.cuda.manual_seed_all(random_seed)
+
+        # deterministic cnn
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False

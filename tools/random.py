@@ -33,20 +33,3 @@ def choice(a, size=None, replace=True):
         np.random.shuffle(random_i)
         random_i = random_i[:num_sample]
         return a[random_i].reshape(size)
-
-def seed(random_seed, strict=False):
-    '''
-    
-    '''
-    np.random.seed(random_seed)
-    torch.manual_seed(random_seed)
-
-    if strict:
-        # Following is verbose, but just in case.
-        random.seed(random_seed)
-        torch.cuda.manual_seed(random_seed)
-        torch.cuda.manual_seed_all(random_seed)
-
-        # deterministic cnn
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
