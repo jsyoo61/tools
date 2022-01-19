@@ -1,6 +1,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+from . import numpy as tnp
 
 class ValueTracker(object):
     """ ValueTracker."""
@@ -56,7 +57,7 @@ class ValueTracker(object):
     def plot(self, w=9, color='tab:blue', ax=None):
         x = np.array(self.x)
         y = np.array(self.y)
-        y_smooth = moving_mean(y, w)
+        y_smooth = tnp.moving_mean(y, w)
         if ax==None:
             ax = plt.gca()
         ax.plot(x, y, color=color, alpha=0.4)
