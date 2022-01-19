@@ -12,6 +12,9 @@ class ValueTracker(object):
     def __init__(self):
         self.reset()
 
+    def __len__(self):
+        return len(self.y)
+
     def __iadd__(self, other):
         self.x.extend(other.x)
         self.y.extend(other.y)

@@ -2,6 +2,8 @@
 import torch
 import torch.nn as nn
 
+# TODO: migrate these functions to hideandseek
+
 # %%
 def transfer(model_source, model_target):
     '''
@@ -91,7 +93,7 @@ def aggregate_grad(model_source, model_target):
 def aggregate_all (model_source, model_target):
     '''
     Aggregate parameters and states of the model.
-    States 
+    States
 
     model_source: List of nn.Model instances
     model_target: Single nn.Model instance

@@ -3,7 +3,8 @@ import os
 import warnings
 
 import numpy as np
-
+import matplotlib.colors as mcolors
+import ..numpy as tnp
 # log = logging.getLogger(__name__)
 
 __all__ = [
@@ -39,6 +40,30 @@ def multisave(fig, path):
     fig.savefig(path+'.png')
     fig.savefig(path+'.eps')
     fig.savefig(path+'.svg')
+
+def plot_values(valuetracker_list, ax=None):
+    n_line = len(valuetracker_list)
+    if ax is None:
+        fig, ax = plt.subplots()
+    color_list = it.cycle(mcolors.TABLEAU_COLORS)
+    for valuetracker, color in zip(valuetracker_list, color_list):
+        y_smooth = tnp.moving_mean(valuetracker.y, 9)
+        ax.plot(valuetracker.x, valuetracker.y, color=color, alpha=0.4)
+        ax.plot(valuetracker.x, y_smooth, color=color)
+    return ax
+
+def plot_trainval(valuetracker_list, ax=None):
+    n_line = len(valuetracker_list)
+    if ax is None:
+        fig, ax = plt.subplots()
+    color_list = ['tab:blue', 'tab:orange']
+    line_list = ['-', 'x-']
+    labels = ['train', 'val']
+    for valuetracker, color, line, label in zip(valuetracker_list, color_list, line_list, labels):
+        y_smooth = tnp.moving_mean(valuetracker.y, 9)
+        ax.plot(valuetracker.x, valuetracker.y, color=color, alpha=0.4, label=label)
+        ax.plot(valuetracker.x, y_smooth, line, color=color, label=label+'_smooth')
+    return ax
 
 if __name__ == '__main__':
     pass

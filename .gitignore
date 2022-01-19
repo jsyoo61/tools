@@ -170,3 +170,7 @@ env/
 dist/
 .github/
 upload.*
+
+/ftpconfigs
+.ftpconfig
+.ftpignore

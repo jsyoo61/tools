@@ -28,6 +28,14 @@ def spread_device(gpu_id = None):
     device = torch.device(f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu")
     return device
 
+def process_number():
+    p=multiprocessing.current_process()
+    try:
+        worker_num = int(p.name.split('-')[-1]) # Fails if it's not integer
+        return worker_num
+    except ValueError:
+        return -1
+
 def multiprocessing_device(gpu_id = None):
     '''
     device setting for hydra multiprocessing
