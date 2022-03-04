@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 import matplotlib.colors as mcolors
-import ..numpy as tnp
+from .. import numpy as tnp
 # log = logging.getLogger(__name__)
 
 __all__ = [
