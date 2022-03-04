@@ -4,22 +4,23 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-class DNN(nn.Module):
+class FNN(nn.Module):
     '''
-    basic DNN module
+    basic FNN module
 
     Parameters
     ----------
     n_input: number of input (int)
+        if n_input is None, then the LazyLinear() is set in the first layer.
     n_hidden_list: list of hidden neurons (list of int)
-    activation_list: torch.nn activation function instances (nn activation instance or list)
+    activation_list: torch.nn activation function instances (nn object or list of nn object)
 
     Example
     -------
-    >>> model = DNN(n_input=10, n_hidden_list=[8,6,5], activation_list=[nn.Sigmoid(), nn.ReLU(), nn.Tanh()])
+    >>> model = FNN(n_input=10, n_hidden_list=[8,6,5], activation_list=[nn.Sigmoid(), nn.ReLU(), nn.Tanh()])
     # n_hidden_list, activation_list corresponds to [h1, h2, output]
     >>> print(model)
-    DNN(
+    FNN(
       (fc): Sequential(
         (0): Linear(in_features=10, out_features=8, bias=True)
         (1): Sigmoid()
@@ -52,7 +53,7 @@ class DNN(nn.Module):
         '''x.shape()==(batch_size, feature_dim)'''
         return self.fc(x)
 
-class DNN_Resnet(nn.Module):
+class FNN_Resnet(nn.Module):
     '''
     Resnet module
 
@@ -124,7 +125,7 @@ class DNN_Resnet(nn.Module):
     - optimize using nn.Sequential() and itertools in forward. compute layers in group
     '''
 
-class DNN_Densenet(nn.Module):
+class FNN_Densenet(nn.Module):
     def __init__(self, n_hidden_list, activation_list, n_input=None, skip=2):
     # def __init__(self, n_input, n_hidden_list, activation_list, skip=2):
         super().__init__()
@@ -302,20 +303,54 @@ class SimpleGaussian(nn.Module):
         return self.amp*torch.exp(-0.5*((x-self.mu)/self.sigma)**2)
 
 class Residual(nn.Module):
+    """
+    Residual module which computes residual connections in forward pass.
+    Note that intermediate tensors need to have the same shape.
+
+    Parameters
+    ----------
+    blocks : list of nn.Module objects, or an iterable nn.Module object.
+
+    Examples
+    --------
+    >>> blocks = [nn.Linear(10,10) for i in range(5)]
+    >>> model = Residual(blocks)
+    >>> model
+
+    """
     # def __init__(self, block, n_repeat, activation = nn.ReLU()):
-    def __init__(self, block, n_repeat):
+    def __init__(self, blocks):
         super().__init__()
-        blocks = [block() for i in range(n_repeat)]
-        self.blocks = blocks
+        if issubclass(type(blocks), nn.Module):
+            self.blocks = blocks
+        elif issubclass(type(blocks), list):
+            self.blocks = nn.ModuleList(blocks)
+        else:
+            raise Exception('')
+        # blocks = [block() for i in range(n_repeat)]
         # self.activation = activation
 
     def forward(self, x):
         for block in self.blocks:
-            # x = self.activation(block(x)+x)
             x = block(x)+x
+            # x = self.activation(block(x)+x)
         return
 
 class Parallel(nn.Module):
+    """
+    Similar to nn.Sequential, but parallel connection.
+    Note that the shape of each output from each module must be identical,
+    since Parallel() sums up all outputs in forward().
+    Also note that Parallel with nn.Identity() is identical to Residual()
+
+    Parameters
+    ----------
+    args : nn.Modules
+
+    Examples
+    --------
+    >>>
+    """
     def __init__(self, *args):
         super().__init__()
         self._layers = args
@@ -344,21 +379,14 @@ class Parallel(nn.Module):
 
     def __getitem__(self, idx):
         return self._layers[idx]
-# def residual_computation(sequential, x, connection='sequential'):
-#     if connection=='sequential':
-#         pass
-#     elif connection=='dense':
-#         pass
-#
-#     return
 
 if __name__ == '__main__':
     n_input = 5
     n_hidden_list = [10,20,30,20,10]
     activation_list = [nn.Sigmoid(), nn.ReLU(), nn.LeakyReLU(0.03), nn.Tanh(), nn.Identity()]
-    dnn = DNN(n_input, n_hidden_list, activation_list)
-    dnn_resnet = DNN_Resnet(n_input, n_hidden_list, activation_list)
-    dnn_densenet = DNN_Densenet(n_input, n_hidden_list, activation_list)
-    print(dnn)
-    print(dnn_resnet)
-    print(dnn_densenet)
+    fnn = FNN(n_input, n_hidden_list, activation_list)
+    fnn_resnet = FNN_Resnet(n_input, n_hidden_list, activation_list)
+    fnn_densenet = FNN_Densenet(n_input, n_hidden_list, activation_list)
+    print(fnn)
+    print(fnn_resnet)
+    print(fnn_densenet)

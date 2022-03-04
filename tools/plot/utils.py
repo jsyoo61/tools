@@ -25,7 +25,7 @@ def get_xtick_seconds(ax, sr):
     # return xticks
     return ax.get_xticks() / sr
 
-def multisave(fig, path):
+def multisave(fig, path, dpi=300):
     '''
     save given figure in .png, .eps, .svg format
     :param fig: pyplot figure instance
@@ -37,7 +37,8 @@ def multisave(fig, path):
         # log.warning('Do not specify extension in multisave(). Removing extension...')
         # path = os.path.splitext(path)[0]
 
-    fig.savefig(path+'.png')
+    fig.savefig(path+'.png', dpi=dpi)
+    fig.savefig(path+'.tiff', dpi=dpi)
     fig.savefig(path+'.eps')
     fig.savefig(path+'.svg')
 
