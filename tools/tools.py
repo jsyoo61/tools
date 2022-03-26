@@ -43,25 +43,26 @@ __all__ = \
  'str2bool',
  'write']
 
-def save_pickle(obj: str, path: str = None):
+ # def save_pickle(obj, path = None, protocol = None): # Typings
+def save_pickle(obj: str, path: str = None, protocol: int = None):
     '''Save object as Pickle file to designated path.
     If path is not given, default to "YearMonthDay_HourMinuteSecond.p" '''
     if path == None:
         path = time.strftime('%y%m%d_%H%M%S.p')
         warnings.warn(f'Be sure to specify specify argument "path"!, saving as {path}...')
     with open(path, 'wb') as f:
-        pickle.dump(obj, f)
+        pickle.dump(obj, f, protocol=protocol)
 
 def load_pickle(path: str):
     '''Load Pickle file from designated path'''
     with open(path, 'rb') as f:
         return pickle.load(f)
 
-def write(content, path, encoding = None):
+def write(content: str, path: str, encoding: str = None):
     with open(path, 'w', encoding = encoding) as f:
         f.write(content)
 
-def append(content, path, encoding = None):
+def append(content: str, path: str , encoding: str = None):
     with open(path, 'a', encoding = encoding) as f:
         f.write(content)
 
@@ -403,6 +404,8 @@ class Path(str):
                 return [os.path.join(self.path, p) for p in os.listdir(self.path)]
             else:
                 return os.listdir(self.path)
+    # def enumdir(self, isdir=False, isfile=False):
+    # generator which returns (item, joined item)
 
 class TDict(dict):
     '''
