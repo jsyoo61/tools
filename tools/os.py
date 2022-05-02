@@ -21,7 +21,7 @@ def listdir(path=None, isdir: bool=False, isfile: Union[bool, str]=False, join: 
     '''
     # Safety check
     if type(isfile)==str:
-        ext = isfile # extension
+        ext = isfile.lower() # extension
         isfile_str = True
         isfile = True
     else:
@@ -46,7 +46,7 @@ def listdir(path=None, isdir: bool=False, isfile: Union[bool, str]=False, join: 
         return [dir for dir, dir_joined in zip(dir_list, dir_list_joined) if os.path.isdir(dir_joined)]
     elif isfile:
         if isfile_str:
-            return [dir for dir, dir_joined in zip(dir_list, dir_list_joined) if os.path.isfile(dir_joined) and (os.path.splitext(dir)[1] == ext)]
+            return [dir for dir, dir_joined in zip(dir_list, dir_list_joined) if os.path.isfile(dir_joined) and (os.path.splitext(dir)[1].lower() == ext)]
         else:
             return [dir for dir, dir_joined in zip(dir_list, dir_list_joined) if os.path.isfile(dir_joined)]
     else:

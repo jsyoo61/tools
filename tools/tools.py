@@ -1,4 +1,5 @@
 from copy import deepcopy as dcopy
+import itertools as it
 import os
 import warnings
 from pathlib import Path as P
@@ -82,9 +83,9 @@ def readlines(path, encoding = None):
         text = f.readlines()
     return text
 
-def cmd(command: str):
+def cmd(command: str, shell: bool = False, encoding: str = None):
     '''Run shell command and return stdout'''
-    pipe = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+    pipe = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding=encoding, shell=shell, text=True)
     return pipe.stdout
 
 def equal(lst):
@@ -197,7 +198,8 @@ def merge_dict(ld):
     into dict of lists
     ld: list of dicts'''
 
-    keys = sorted(list(set([d.keys() for d in ld])))
+    # keys = sorted(list(set([d.keys() for d in ld])))
+    keys = sorted(list(set(it.chain(*[d.keys() for d in ld]))))
     d_merged = {key:[] for key in keys}
     for d in ld:
         for k, v in d.items():
