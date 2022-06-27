@@ -154,7 +154,7 @@ def unnest_dict(d, format='.'):
     # d = d.copy()
     for k, v in d.items():
         if type(v)==dict:
-            un_d_ = unnest_dict(v)
+            un_d_ = unnest_dict(v, format=format)
             for k_, v_ in un_d_.items():
                 un_d[str(k)+format+str(k_)] = v_
         else:
