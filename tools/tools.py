@@ -35,7 +35,6 @@ __all__ = \
  'update_ld',
  'update_keys',
  'merge_dict',
- # 'pprint_dict',
  'prettify_dict',
  'read',
  'readline',
@@ -475,45 +474,48 @@ class Timer():
     reset
         sets self.elapsed_time = 0
     '''
-    def __init__(self, print = False, return_f = True, auto_reset = True):
-        self.print = print
-        self.return_f = return_f
+    def __init__(self, auto_reset = True):
         self.auto_reset = auto_reset
-        self.elapsed_time = 0
+        self._elapsed_time = 0
         self.running = False
+
+    def __repr__(self):
+        options = ''
+        if self.auto_reset: options += '(auto_reset)'
+
+        if len(options)==0:
+            return f'[Timer][running: {self.running}][elapsed_time: {self.elapsed_time()}]'
+        else:
+            return f'[Timer {options}][running: {self.running}][elapsed_time: {self.elapsed_time()}]'
 
     def __enter__(self):
         self.start()
 
     def __exit__(self):
-        t = self.stop()
-        print(t)
+        self.stop()
 
     def start(self):
         if self.auto_reset:
             # self.reset()
-            self.elapsed_time = 0
+            self._elapsed_time = 0
         self.running = True
         self.start_time = time.time()
 
     def stop(self):
         if self.running:
             self.end_time = time.time()
-            self.elapsed_time += self.end_time - self.start_time
+            self._elapsed_time += self.end_time - self.start_time
             self.running = False
-        if self.print:
-            print(self.elapsed_time)
-        if self.return_f:
-            return self.elapsed_time
+        return self._elapsed_time
 
-    def elapsed(self):
+    def elapsed_time(self):
         if self.running:
-            return time.time() - self.start_time
+            return self._elapsed_time + time.time() - self.start_time
         else:
-            warnings.warn('timer is not running. call start() first')
+            return self._elapsed_time
 
     def reset(self):
-        self.elapsed_time = 0
+        self._elapsed_time = 0
 
 class Wrapper:
     def __repr__(self):

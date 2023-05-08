@@ -67,6 +67,13 @@ class ValueTracker(object):
         ax.plot(x, y_smooth, color=color)
         return ax
 
+    def mean(self):
+        return np.mean(self.y)
+    def min(self):
+        return np.min(self.y)
+    def max(self):
+        return np.max(self.y)
+
 class AverageMeter(object):
     """Computes and stores the average and current value
     Variables
@@ -92,3 +99,19 @@ class AverageMeter(object):
         self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count
+
+class DictList(object):
+    """Dictionary of lists"""
+    def __init__(self, keys):
+        self._dict = {}
+
+    def append(self, data):
+        assert type(data) in [list, dict]
+        if type(data)==dict:
+            assert set(self._dict.keys())==set(data.keys()), f'allowed keys are: {self._dict.keys()}, received: {data.keys()}'
+            for key, value in data.items():
+                self._dict[key].append(item)
+        else:
+            warnings.warn('Appending with list is not recommended as this cannot ensure the data are being appended to the right place.')
+            for key, value in zip(self._dict.items(), data):
+                self._dict[key].append(value)
