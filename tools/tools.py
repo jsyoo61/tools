@@ -11,37 +11,39 @@ import yaml
 from . import os as _os
 
 __all__ = \
-['Filename',
- 'Printer',
- 'TDict',
- 'Timer',
- 'Path',
- 'Wrapper',
- 'append',
- 'cmd',
- 'equal',
- 'equal_set',
- 'equal_array',
- 'iseven',
- 'isodd',
- 'is_iterable',
- 'isnumeric',
- 'isint',
- 'load_pickle',
- 'now',
- 'reverse_dict',
- 'unnest_dict',
- 'nestdict_to_list',
- 'update_ld',
- 'update_keys',
- 'merge_dict',
- 'prettify_dict',
- 'read',
- 'readline',
- 'readlines',
- 'save_pickle',
- 'str2bool',
- 'write']
+[
+#  'Filename',
+'Printer',
+'TDict',
+'Timer',
+#  'Path',
+'Wrapper',
+'append',
+'cmd',
+'equal',
+'equal_set',
+'equal_array',
+'iseven',
+'isodd',
+'is_iterable',
+'isnumeric',
+'isint',
+'load_pickle',
+'now',
+'reverse_dict',
+'unnest_dict',
+'nestdict_to_list',
+'update_ld',
+'update_keys',
+'merge_dict',
+'prettify_dict',
+'read',
+'readline',
+'readlines',
+'save_pickle',
+'str2bool',
+'write'
+]
 
  # def save_pickle(obj, path = None, protocol = None): # Typings
 def save_pickle(obj: str, path: str = None, protocol: int = None):
@@ -272,141 +274,143 @@ def now(format: str ='-'):
     else:
         raise Exception("format has to be one of ['-', '_']")
 
-class Filename():
-    '''(Will be deprecated since Path() can be used)
-    Class to handle Filename with suffix.
-    To call filename with suffix, call the instance.
+# DEPRECATED: use pathlib.Path() instead
+# class Filename():
+#     '''
+#     Class to handle Filename with suffix.
+#     To call filename with suffix, call the instance.
 
-    Example
-    -------
-    >>> file = Filename('model', '.pt')
-    >>> file
-    (Filename, name: "model", suffix: ".pt")
-    >>> str(file)
-    "model"
-    >>> file()
-    "model.pt"
-    >>> (file+'1')
-    "model1"
-    >>> (file+'1')()
-    "model1.pt"
-    '''
-    def __init__(self,obj=None, suffix=''):
-        self.name = str(obj)
-        self.suffix = suffix
+#     Example
+#     -------
+#     >>> file = Filename('model', '.pt')
+#     >>> file
+#     (Filename, name: "model", suffix: ".pt")
+#     >>> str(file)
+#     "model"
+#     >>> file()
+#     "model.pt"
+#     >>> (file+'1')
+#     "model1"
+#     >>> (file+'1')()
+#     "model1.pt"
+#     '''
+#     def __init__(self,obj=None, suffix=''):
+#         self.name = str(obj)
+#         self.suffix = suffix
 
-    def __call__(self):
-        '''Add suffix and return str'''
-        return self.name+self.suffix
+#     def __call__(self):
+#         '''Add suffix and return str'''
+#         return self.name+self.suffix
 
-    def __radd__(self, other):
-        return Filename(other+self.name,suffix=self.suffix)
+#     def __radd__(self, other):
+#         return Filename(other+self.name,suffix=self.suffix)
 
-    def __add__(self, other):
-        return Filename(self.name+other,suffix=self.suffix)
+#     def __add__(self, other):
+#         return Filename(self.name+other,suffix=self.suffix)
 
-    def __mul__(self, other):
-        return Filename(self.name*other,suffix=self.suffix)
+#     def __mul__(self, other):
+#         return Filename(self.name*other,suffix=self.suffix)
 
-    def __repr__(self):
-        return '(Filename, name: "%s", suffix: "%s")'%(self.name, self.suffix)
+#     def __repr__(self):
+#         return '(Filename, name: "%s", suffix: "%s")'%(self.name, self.suffix)
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
 
-class Path(str):
-    '''
-    Joins paths by . syntax
-    (Want to use pathlib.Path internally, but currently inherit from str)
+# DEPRECATED: use pathlib.Path() instead
+# class Path(str):
+#     '''
+#     Joins paths by . syntax
+#     (Want to use pathlib.Path internally, but currently inherit from str)
 
-    Parameters
-    ----------
-    path: str (default: '.')
-        Notes the default path. Leave for default blank value which means the current working directory.
-        So YOU MUST NOT USE "path" AS ATTRIBUTE NAME, WHICH WILL MESS UP EVERYTHING
+#     Parameters
+#     ----------
+#     path: str (default: '.')
+#         Notes the default path. Leave for default blank value which means the current working directory.
+#         So YOU MUST NOT USE "path" AS ATTRIBUTE NAME, WHICH WILL MESS UP EVERYTHING
 
-    Example
-    -------
-    >>> path = Path('C:/exp')
-    >>> path
-    path: C:/exp
+#     Example
+#     -------
+#     >>> path = Path('C:/exp')
+#     >>> path
+#     path: C:/exp
 
-    >>> path.DATA = 'CelebA'
-    >>> path
-    path: C:/exp
-    DATA: C:/exp/CelebA
+#     >>> path.DATA = 'CelebA'
+#     >>> path
+#     path: C:/exp
+#     DATA: C:/exp/CelebA
 
-    >>> path.PROCESSED = 'processed'
-    >>> path.PROCESSED.M1 = 'method1'
-    >>> path.PROCESSED.M2 = 'method2'
-    >>> path
-    path: C:/exp
-    DATA: C:/exp/CelebA
-    PROCESSED: C:/exp/processed
+#     >>> path.PROCESSED = 'processed'
+#     >>> path.PROCESSED.M1 = 'method1'
+#     >>> path.PROCESSED.M2 = 'method2'
+#     >>> path
+#     path: C:/exp
+#     DATA: C:/exp/CelebA
+#     PROCESSED: C:/exp/processed
 
-    >>> path.PROCESSED
-    M1: C:/exp/processed/method1
-    M2: C:/exp/processed/method2
-    -------
+#     >>> path.PROCESSED
+#     M1: C:/exp/processed/method1
+#     M2: C:/exp/processed/method2
+#     -------
 
-    '''
-    def __init__(self, path='.'):
-        self.path=path
+#     '''
+#     def __init__(self, path='.'):
+#         self.path=path
 
-    def __repr__(self):
-        return f'Path({self.path})'
+#     def __repr__(self):
+#         return f'Path({self.path})'
 
-    def __call__(self, indent=0):
-        '''Print out current path, and children'''
-        for name, directory in self.__dict__.items():
-            if name != 'path':
-                print(' '*indent+name+': '+str(directory))
-                if type(directory) == Path:
-                    directory(indent+2)
-        # print('\n'.join([key+': '+str(value) for key, value in self.__dict__.items()]))
+#     def __call__(self, indent=0):
+#         '''Print out current path, and children'''
+#         for name, directory in self.__dict__.items():
+#             if name != 'path':
+#                 print(' '*indent+name+': '+str(directory))
+#                 if type(directory) == Path:
+#                     directory(indent+2)
+#         # print('\n'.join([key+': '+str(value) for key, value in self.__dict__.items()]))
 
-    def __str__(self):
-        return self.path
+#     def __str__(self):
+#         return self.path
 
-    def __setattr__(self, key, value):
-        # super(Path, self).__setattr__(key, self / value) # self.joinpath(value)
-        if hasattr(self, 'path'):
-            assert key != 'path', '"path" is a predefined attribute and must not be used. Use some other attribute name'
-            super(Path, self).__setattr__(key, Path(os.path.join(self.path, value)))
-        else:
-            super(Path, self).__setattr__(key, value)
+#     def __setattr__(self, key, value):
+#         # super(Path, self).__setattr__(key, self / value) # self.joinpath(value)
+#         if hasattr(self, 'path'):
+#             assert key != 'path', '"path" is a predefined attribute and must not be used. Use some other attribute name'
+#             super(Path, self).__setattr__(key, Path(os.path.join(self.path, value)))
+#         else:
+#             super(Path, self).__setattr__(key, value)
 
-    def join(self, *args):
-        return Path(os.path.join(self.path, *args))
+#     def join(self, *args):
+#         return Path(os.path.join(self.path, *args))
 
-    def makedirs(self, exist_ok=True):
-        '''Make directories of all children paths
-        Be sure to define all folders first, makedirs(), and then define files in Path(),
-        since defining files before makedirs() will lead to creating directories with names of files.
-        It is possible to ignore paths with "." as all files do, but there are hidden directories that
-        start with "." which makes things complicated. Thus, defining folders -> makedirs() -> define files
-        is recommended.'''
-        for directory in self.__dict__.values():
-            if directory != '':
-                os.makedirs(str(directory), exist_ok=exist_ok)
-                if type(directory) == Path:
-                    directory.makedirs(exist_ok=exist_ok)
+#     def makedirs(self, exist_ok=True):
+#         '''Make directories of all children paths
+#         Be sure to define all folders first, makedirs(), and then define files in Path(),
+#         since defining files before makedirs() will lead to creating directories with names of files.
+#         It is possible to ignore paths with "." as all files do, but there are hidden directories that
+#         start with "." which makes things complicated. Thus, defining folders -> makedirs() -> define files
+#         is recommended.'''
+#         for directory in self.__dict__.values():
+#             if directory != '':
+#                 os.makedirs(str(directory), exist_ok=exist_ok)
+#                 if type(directory) == Path:
+#                     directory.makedirs(exist_ok=exist_ok)
 
-    def clear(self, ignore_errors=True):
-        '''Delete all files and directories in current directory'''
-        for directory in self.__dict__.values():
-            shutil.rmtree(directory, ignore_errors=ignore_errors)
+#     def clear(self, ignore_errors=True):
+#         '''Delete all files and directories in current directory'''
+#         for directory in self.__dict__.values():
+#             shutil.rmtree(directory, ignore_errors=ignore_errors)
 
-    def listdir(self, join=False, isdir=False, isfile=False):
-        if isdir or isfile:
-            return _os.listdir(self.path, join=join, isdir=isdir, isfile=isfile)
-        else:
-            if join:
-                return [os.path.join(self.path, p) for p in os.listdir(self.path)]
-            else:
-                return os.listdir(self.path)
-    # def enumdir(self, isdir=False, isfile=False):
-    # generator which returns (item, joined item)
+#     def listdir(self, join=False, isdir=False, isfile=False):
+#         if isdir or isfile:
+#             return _os.listdir(self.path, join=join, isdir=isdir, isfile=isfile)
+#         else:
+#             if join:
+#                 return [os.path.join(self.path, p) for p in os.listdir(self.path)]
+#             else:
+#                 return os.listdir(self.path)
+#     # def enumdir(self, isdir=False, isfile=False):
+#     # generator which returns (item, joined item)
 
 class TDict(dict):
     '''

@@ -1,5 +1,5 @@
 
-__version__ = "2023.5.7.0"
+__version__ = "2024.1.19.1"
 from .tools import *
 from . import os
 

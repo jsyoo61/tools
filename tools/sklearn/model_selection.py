@@ -48,7 +48,7 @@ def train_val_test_split_i(y, val_size=0.15, test_size=0.15, random_state=None):
 
     return train_i, val_i, test_i
 
-def stratified_kfold_split(y, n_splits, split_i, shuffle=True, random_state=None):
+def stratified_kfold_split_i(y, n_splits, split_i, shuffle=True, random_state=None):
     '''
     return train, test indices of "split_i"-th split of "n_splits"-fold split
     '''
@@ -61,6 +61,67 @@ def stratified_kfold_split(y, n_splits, split_i, shuffle=True, random_state=None
     train_i, test_i = next(skf_)
 
     return train_i, test_i
+
+def stratified_nested_kfold_split_i(y, n_splits, m_splits, split_i, split_j, shuffle=True, random_state=None):
+    '''
+    return train, val, test indices of "split_i"-th split of "n_splits"-fold split
+    '''
+    # Outer split
+    skf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state)
+    x = np.zeros(len(y))
+    skf_ = skf.split(x, y)
+
+    for i in range(split_i):
+        next(skf_)
+    train_val_i, test_i = next(skf_) 
+
+    # Inner split
+    skf = StratifiedKFold(n_splits=m_splits, shuffle=shuffle, random_state=random_state)
+    x = np.zeros(len(y[train_val_i]))
+    skf_ = skf.split(x, y[train_val_i])
+
+    for j in range(split_j):
+        next(skf_)
+    train_i, val_i = next(skf_)
+    train_i, val_i = train_val_i[train_i], train_val_i[val_i]
+
+    return train_i, val_i, test_i
+
+def kfold_split_i(y, n_splits, split_i, shuffle=True, random_state=None):
+    '''
+    return train, test indices of "split_i"-th split of "n_splits"-fold split
+    '''
+    kf = KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state)
+    kf_ = kf.split(y)
+
+    for i in range(split_i):
+        next(kf_)
+    train_i, test_i = next(kf_)
+
+    return train_i, test_i
+
+def nested_kfold_split_i(y, n_splits, m_splits, split_i, split_j, shuffle=True, random_state=None):
+    '''
+    return train, val, test indices of "split_i"-th split of "n_splits"-fold split
+    '''
+    # Outer split
+    kf = KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state)
+    kf_ = kf.split(y)
+
+    for i in range(split_i):
+        next(kf_)
+    train_val_i, test_i = next(kf_) 
+
+    # Inner split
+    kf = KFold(n_splits=m_splits, shuffle=shuffle, random_state=random_state)
+    kf_ = kf.split(y[train_val_i])
+
+    for j in range(split_j):
+        next(kf_)
+    train_i, val_i = next(kf_)
+    train_i, val_i = train_val_i[train_i], train_val_i[val_i]
+
+    return train_i, val_i, test_i
 
 # def train_val_test_split(x, val_size=0.1, test_size=0.1, random_state=None):
 #     if type(x)==int:
