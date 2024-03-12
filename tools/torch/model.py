@@ -311,6 +311,9 @@ class Residual(nn.Module):
     ----------
     blocks : list of nn.Module objects, or an iterable nn.Module object.
 
+    activation : nn.Module object (default: None)
+        activation function to be applied at each residual connection betwee blocks.
+
     Examples
     --------
     >>> blocks = [nn.Linear(10,10) for i in range(5)]
@@ -319,7 +322,7 @@ class Residual(nn.Module):
 
     """
     # def __init__(self, block, n_repeat, activation = nn.ReLU()):
-    def __init__(self, blocks):
+    def __init__(self, blocks, activation=None):
         super().__init__()
         if issubclass(type(blocks), nn.Module):
             self.blocks = blocks
@@ -327,14 +330,17 @@ class Residual(nn.Module):
             self.blocks = nn.ModuleList(blocks)
         else:
             raise Exception('')
-        # blocks = [block() for i in range(n_repeat)]
-        # self.activation = activation
+        self.activation = activation
 
     def forward(self, x):
-        for block in self.blocks:
-            x = block(x)+x
-            # x = self.activation(block(x)+x)
-        return
+        if self.activation is not None:
+            for block in self.blocks:
+                x = self.activation(block(x)+x)
+
+        else: # No activation
+            for block in self.blocks:
+                x = block(x)+x
+        return x
 
 class Parallel(nn.Module):
     """
