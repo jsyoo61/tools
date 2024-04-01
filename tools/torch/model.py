@@ -321,7 +321,6 @@ class Residual(nn.Module):
     >>> model
 
     """
-    # def __init__(self, block, n_repeat, activation = nn.ReLU()):
     def __init__(self, blocks, activation=None):
         super().__init__()
         if issubclass(type(blocks), nn.Module):

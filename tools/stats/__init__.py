@@ -1,11 +1,19 @@
 import numpy as np
 import scipy.stats as st
 
-# from . import model_selection
 def ci(std, n, p=0.95):
-    z = st.norm.ppf(p)
+    z = st.norm.ppf((1+p)/2) # Two-tailed confidence interval
     half_range = z*std/np.sqrt(n)
     return half_range
+
+def interval(distrib, confidence, **kwargs):
+    if 'std' in kwargs and 'n' in kwargs:
+        scale = kwargs['std']/np.sqrt(kwargs['n'])
+        assert 'scale' not in kwargs, 'scale is given but std and n are also given'
+        kwargs['scale'] = scale
+        del kwargs['std'], kwargs['n']
+
+    return distrib.interval(confidence, **kwargs)
 
 def ci_stats(mean, std, n, p=0.95):
     '''
