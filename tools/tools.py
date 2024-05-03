@@ -395,7 +395,7 @@ class Path(pathlib.Path):
         # super(Path, self).__setattr__(key, self / value) # self.joinpath(value)
         if key.startswith('_'):
             super(Path, self).__setattr__(key, value)
-        elif hasattr(self, key) and hasattr(self.key, '__call__'):
+        elif hasattr(self, key) and hasattr(getattr(self, key), '__call__'):
             raise AttributeError(f'Attribute "{key}" already exists')
         else:
             super(Path, self).__setattr__(key, Path(self / value))
@@ -406,7 +406,7 @@ class Path(pathlib.Path):
         #     super(Path, self).__setattr__(key, value)
 
     def join(self, *args):
-        return Path(os.path.join(self._path, *args))
+        return Path(os.path.join(self, *args))
 
     def makedirs(self, exist_ok=True):
         '''Make directories of all children paths
