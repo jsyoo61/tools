@@ -34,13 +34,12 @@ def listdir(path=None, isdir: bool=False, isfile: Union[bool, str]=False, join: 
 
     dir_list = os.listdir(path)
 
-    # skip this variable if unnecessary
+    # when path is referring to somewhere non-cwd, we need dir_list_joined to pass reference for isdir() or isfile().
     if join or isdir or isfile:
         dir_list_joined = dir_list if path is None else [os.path.join(path, dir) for dir in dir_list]
 
     if join:
         dir_list = dir_list_joined
-    # else: pass
 
     if isdir:
         return [dir for dir, dir_joined in zip(dir_list, dir_list_joined) if os.path.isdir(dir_joined)]

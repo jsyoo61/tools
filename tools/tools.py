@@ -16,7 +16,7 @@ __all__ = \
 'Printer',
 'TDict',
 'Timer',
-#  'Path',
+ 'Path',
 'Wrapper',
 'append',
 'cmd',
@@ -318,99 +318,123 @@ def now(format: str ='-'):
 #         return self.name
 
 # DEPRECATED: use pathlib.Path() instead
-# class Path(str):
-#     '''
-#     Joins paths by . syntax
-#     (Want to use pathlib.Path internally, but currently inherit from str)
+import pathlib
+class Path(pathlib.Path):
+    '''
+    Joins paths by . syntax
+    (Want to use pathlib.Path internally, but currently inherit from str)
 
-#     Parameters
-#     ----------
-#     path: str (default: '.')
-#         Notes the default path. Leave for default blank value which means the current working directory.
-#         So YOU MUST NOT USE "path" AS ATTRIBUTE NAME, WHICH WILL MESS UP EVERYTHING
+    Parameters
+    ----------
+    path: str (default: '.')
+        Notes the default path. Leave for default blank value which means the current working directory.
+        So YOU MUST NOT USE "path" AS ATTRIBUTE NAME, WHICH WILL MESS UP EVERYTHING
 
-#     Example
-#     -------
-#     >>> path = Path('C:/exp')
-#     >>> path
-#     path: C:/exp
+    Example
+    -------
+    >>> path = Path('C:/exp')
+    >>> path
+    path: C:/exp
 
-#     >>> path.DATA = 'CelebA'
-#     >>> path
-#     path: C:/exp
-#     DATA: C:/exp/CelebA
+    >>> path.DATA = 'CelebA'
+    >>> path
+    path: C:/exp
+    DATA: C:/exp/CelebA
 
-#     >>> path.PROCESSED = 'processed'
-#     >>> path.PROCESSED.M1 = 'method1'
-#     >>> path.PROCESSED.M2 = 'method2'
-#     >>> path
-#     path: C:/exp
-#     DATA: C:/exp/CelebA
-#     PROCESSED: C:/exp/processed
+    >>> path.PROCESSED = 'processed'
+    >>> path.PROCESSED.M1 = 'method1'
+    >>> path.PROCESSED.M2 = 'method2'
+    >>> path
+    path: C:/exp
+    DATA: C:/exp/CelebA
+    PROCESSED: C:/exp/processed
 
-#     >>> path.PROCESSED
-#     M1: C:/exp/processed/method1
-#     M2: C:/exp/processed/method2
-#     -------
+    >>> path.PROCESSED
+    M1: C:/exp/processed/method1
+    M2: C:/exp/processed/method2
+    -------
 
-#     '''
-#     def __init__(self, path='.'):
-#         self.path=path
+    '''
+    def __new__(cls, *args):
+        if cls is Path:
+            cls = WindowsPath2 if os.name == 'nt' else PosixPath2
+        self = cls._from_parts(args, init=False)
+        if not self._flavour.is_supported:
+            raise NotImplementedError("cannot instantiate %r on your system"
+                                    % (cls.__name__,))
+        self._init()
 
-#     def __repr__(self):
-#         return f'Path({self.path})'
+        # self._path=Path(*args)
+        # self = object.__new__(cls)
+        return self
+    
+    # def __init__(self, *args):
 
-#     def __call__(self, indent=0):
-#         '''Print out current path, and children'''
-#         for name, directory in self.__dict__.items():
-#             if name != 'path':
-#                 print(' '*indent+name+': '+str(directory))
-#                 if type(directory) == Path:
-#                     directory(indent+2)
-#         # print('\n'.join([key+': '+str(value) for key, value in self.__dict__.items()]))
+    def __repr__(self):
+        return f'tools.Path({super().__str__()})'
 
-#     def __str__(self):
-#         return self.path
+    def summary(self, indent=0):
+        '''Print out current path, and children'''
+        for name, _path in self.__dict__.items():
+            print(' '*indent+name+': '+str(_path))
+            if issubclass(type(_path), Path):
+                _path.summary(indent+2)
 
-#     def __setattr__(self, key, value):
-#         # super(Path, self).__setattr__(key, self / value) # self.joinpath(value)
-#         if hasattr(self, 'path'):
-#             assert key != 'path', '"path" is a predefined attribute and must not be used. Use some other attribute name'
-#             super(Path, self).__setattr__(key, Path(os.path.join(self.path, value)))
-#         else:
-#             super(Path, self).__setattr__(key, value)
+            # if name != 'path':
+        # print('\n'.join([key+': '+str(value) for key, value in self.__dict__.items()]))
 
-#     def join(self, *args):
-#         return Path(os.path.join(self.path, *args))
+    def __fspath__(self):
+        return super().__fspath__()
+        # return self._path.__fspath__()
 
-#     def makedirs(self, exist_ok=True):
-#         '''Make directories of all children paths
-#         Be sure to define all folders first, makedirs(), and then define files in Path(),
-#         since defining files before makedirs() will lead to creating directories with names of files.
-#         It is possible to ignore paths with "." as all files do, but there are hidden directories that
-#         start with "." which makes things complicated. Thus, defining folders -> makedirs() -> define files
-#         is recommended.'''
-#         for directory in self.__dict__.values():
-#             if directory != '':
-#                 os.makedirs(str(directory), exist_ok=exist_ok)
-#                 if type(directory) == Path:
-#                     directory.makedirs(exist_ok=exist_ok)
+    def __str__(self):
+        return super().__str__()
+        # return str(self._path)
 
-#     def clear(self, ignore_errors=True):
-#         '''Delete all files and directories in current directory'''
-#         for directory in self.__dict__.values():
-#             shutil.rmtree(directory, ignore_errors=ignore_errors)
+    def __setattr__(self, key, value):
+        # super(Path, self).__setattr__(key, self / value) # self.joinpath(value)
+        if key.startswith('_'):
+            super(Path, self).__setattr__(key, value)
+        elif hasattr(self, key) and hasattr(self.key, '__call__'):
+            raise AttributeError(f'Attribute "{key}" already exists')
+        else:
+            super(Path, self).__setattr__(key, Path(self / value))
+        # if hasattr(self, 'path'):
+        #     assert key != 'path', '"path" is a predefined attribute and must not be used. Use some other attribute name'
+        #     super(Path, self).__setattr__(key, Path(os.path.join(self._path, value)))
+        # else:
+        #     super(Path, self).__setattr__(key, value)
 
-#     def listdir(self, join=False, isdir=False, isfile=False):
-#         if isdir or isfile:
-#             return _os.listdir(self.path, join=join, isdir=isdir, isfile=isfile)
-#         else:
-#             if join:
-#                 return [os.path.join(self.path, p) for p in os.listdir(self.path)]
-#             else:
-#                 return os.listdir(self.path)
-#     # def enumdir(self, isdir=False, isfile=False):
-#     # generator which returns (item, joined item)
+    def join(self, *args):
+        return Path(os.path.join(self._path, *args))
+
+    def makedirs(self, exist_ok=True):
+        '''Make directories of all children paths
+        Be sure to define all folders first, makedirs(), and then define files in Path(),
+        since defining files before makedirs() will lead to creating directories with names of files.
+        It is possible to ignore paths with "." as all files do, but there are hidden directories that
+        start with "." which makes things complicated. Thus, defining folders -> makedirs() -> define files
+        is recommended.'''
+        for directory in self.__dict__.values():
+            if directory != '':
+                os.makedirs(str(directory), exist_ok=exist_ok)
+                if type(directory) == Path:
+                    directory.makedirs(exist_ok=exist_ok)
+
+    # DEPRECATED: Use shutil.rmtree(path) instead
+    # def clear(self, ignore_errors=True):
+    #     '''Delete all files and directories in current directory'''
+    #     for directory in self.__dict__.values():
+    #         shutil.rmtree(directory, ignore_errors=ignore_errors)
+
+    def listdir(self, join=False, isdir=False, isfile=False):
+        return _os.listdir(self, join=join, isdir=isdir, isfile=isfile)
+
+class WindowsPath2(Path, pathlib.WindowsPath):
+    pass
+class PosixPath2(Path, pathlib.PosixPath):
+    pass
+
 
 class TDict(dict):
     '''
