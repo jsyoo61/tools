@@ -10,7 +10,7 @@ setuptools.setup(
     name="tools-jsyoo61", # Replace with your own username
     version=__version__,
     author="JaeSung Yoo",
-    author_email="jsyoo61@korea.ac.kr",
+    author_email="jsyoo61@unc.edu",
     description="personal syntax tool",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -22,5 +22,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    install_requires=['numpy','pandas','matplotlib']
+    # install_requires=['numpy','pandas','matplotlib']
 )
