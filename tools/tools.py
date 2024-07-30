@@ -2,11 +2,10 @@ from copy import deepcopy as dcopy
 import itertools as it
 import os
 import warnings
-from pathlib import Path as P
+import pathlib
 import pickle
 import subprocess
 import time
-import yaml
 
 from . import os as _os
 
@@ -318,7 +317,6 @@ def now(format: str ='-'):
 #         return self.name
 
 # DEPRECATED: use pathlib.Path() instead
-import pathlib
 class Path(pathlib.Path):
     '''
     Joins paths by . syntax
