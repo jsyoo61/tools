@@ -317,6 +317,7 @@ def now(format: str ='-'):
 #         return self.name
 
 # DEPRECATED: use pathlib.Path() instead
+
 class Path(pathlib.Path):
     '''
     Joins paths by . syntax
@@ -356,11 +357,7 @@ class Path(pathlib.Path):
     def __new__(cls, *args):
         if cls is Path:
             cls = WindowsPath2 if os.name == 'nt' else PosixPath2
-        self = cls._from_parts(args, init=False)
-        if not self._flavour.is_supported:
-            raise NotImplementedError("cannot instantiate %r on your system"
-                                    % (cls.__name__,))
-        self._init()
+        self = super().__new__(cls, *args)
 
         # self._path=Path(*args)
         # self = object.__new__(cls)

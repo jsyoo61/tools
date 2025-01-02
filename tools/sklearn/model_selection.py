@@ -1,7 +1,13 @@
+# %%
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedShuffleSplit, ShuffleSplit, train_test_split, StratifiedKFold, KFold
 import numpy as np
+from .. import torch as ttorch
 
+# %%
+'''
+Train/(Validation)/Test Split index functions
+'''
 def stratified_train_test_split_i(y, test_size=0.15, random_state=None):
     ''':return: indices of train_i, test_i'''
     x = np.empty(len(y))
@@ -123,6 +129,18 @@ def nested_kfold_split_i(y, n_splits, m_splits, split_i, split_j, shuffle=True, 
 
     return train_i, val_i, test_i
 
+# %%
+'''
+Train/(Validation)/Test split dataset functions
+'''
+def nested_kfold_split_dataset(dataset, n_splits, m_splits, split_i, split_j, shuffle=True, random_state=None):
+    y = np.zeros(len(dataset))
+    train_i, val_i, test_i = nested_kfold_split_i(y, n_splits, m_splits, split_i, split_j, shuffle, random_state)
+    ds_train, ds_val, ds_test = ttorch.data.ProxyDataset(dataset=dataset, idxs=train_i), ttorch.data.ProxyDataset(dataset=dataset, idxs=val_i), ttorch.data.ProxyDataset(dataset=dataset, idxs=test_i)
+    return ds_train, ds_val, ds_test
+
+
+# %%
 # def train_val_test_split(x, val_size=0.1, test_size=0.1, random_state=None):
 #     if type(x)==int:
 #         x = np.zeros(x)
