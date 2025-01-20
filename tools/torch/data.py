@@ -21,6 +21,11 @@ class ProxyDataset(D.Dataset):
         self.dataset = dataset
         self.idxs = idxs
 
+        # Copy attributes from the original dataset
+        keys = [key for key in dir(dataset) if key.startswith('__') is False]
+        for key in keys:
+            setattr(self, key, getattr(dataset, key))
+
     def __repr__(self):
         return f'ProxyDataset({self.dataset}, len: {len(self)}/{len(self.dataset)}({len(self)/len(self.dataset)*1e2:.0f}%))'
 

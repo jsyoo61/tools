@@ -14,8 +14,16 @@ __all__ = [
 'seed',
 ]
 
-def get_device(model):
-    return next(model.parameters()).device
+def get_device(network):
+    return next(network.parameters()).device
+
+def to(data, *args, **kwargs):
+    if isinstance(data, (list, tuple)):
+        return [getattr(tensor, 'to')(*args, **kwargs) for tensor in data]
+    elif isinstance(data, dict):
+        return {k: getattr(tensor, 'to')(*args, **kwargs) for k, tensor in data.items()}
+    else:
+        return data.to(*args, **kwargs)
 
 def spread_device(gpu_id = None):
     '''

@@ -35,6 +35,7 @@ __all__ = \
 'update_ld',
 'update_keys',
 'merge_dict',
+'merge_tuple',
 'prettify_dict',
 'read',
 'readline',
@@ -205,6 +206,17 @@ def merge_dict(ld):
         for k, v in d.items():
             d_merged[k].append(v)
     return d_merged
+
+def merge_tuple(lt):
+    '''merge list of tuples
+    into tuple of lists
+    lt: list of tuples'''
+    n_tuple = len(lt[0])
+    l_merged = [[] for _ in range(n_tuple)]
+    for t in lt:
+        for i, v in enumerate(t):
+            l_merged[i].append(v)
+    return tuple(l_merged)
 
 # def prettify_dict(d, print_type='yaml', **kwargs):
 #     '''prettify long dictionary
