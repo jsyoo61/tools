@@ -6,6 +6,7 @@ import torch
 
 __all__ = [
 'get_device',
+'to',
 'multiprocessing_device',
 'nanparam',
 'nangrad',
@@ -17,9 +18,13 @@ __all__ = [
 def get_device(network):
     return next(network.parameters()).device
 
+# TODO: Merge into get_device
+def device_of_optimizer(optimizer):
+    return optimizer.param_groups[0]['params'][0].device
+
 def to(data, *args, **kwargs):
     if isinstance(data, (list, tuple)):
-        return [getattr(tensor, 'to')(*args, **kwargs) for tensor in data]
+        return tuple(getattr(tensor, 'to')(*args, **kwargs) for tensor in data)
     elif isinstance(data, dict):
         return {k: getattr(tensor, 'to')(*args, **kwargs) for k, tensor in data.items()}
     else:

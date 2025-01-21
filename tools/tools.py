@@ -236,6 +236,10 @@ def merge_tuple(lt):
 def prettify_dict(dictionary, indent=0):
     return '\n'.join([' '*indent + str(k) +': '+str(v) if type(v)!=dict else str(k)+':\n'+prettify_dict(v, indent=indent+2) for k, v in dictionary.items()])
 
+# def pipeline(functions, args):
+#     from functools import reduce
+#     return reduce(lambda acc, func: func(acc), functions, args)
+
 # Used in Argparse
 def str2bool(x):
     try:
