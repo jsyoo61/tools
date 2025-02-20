@@ -2,6 +2,9 @@
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedShuffleSplit, ShuffleSplit, train_test_split, StratifiedKFold, KFold
 import numpy as np
+import pandas as pd
+import torch
+
 from .. import torch as ttorch
 
 # %%
@@ -133,12 +136,47 @@ def nested_kfold_split_i(y, n_splits, m_splits, split_i, split_j, shuffle=True, 
 '''
 Train/(Validation)/Test split dataset functions
 '''
-def nested_kfold_split_dataset(dataset, n_splits, m_splits, split_i, split_j, shuffle=True, random_state=None):
-    y = np.zeros(len(dataset))
+def nested_kfold_split_dataset(data, y, n_splits, m_splits, split_i, split_j, shuffle=True, random_state=None):
+    '''
+    y doesn't matter since it's not stratified
+    '''
     train_i, val_i, test_i = nested_kfold_split_i(y, n_splits, m_splits, split_i, split_j, shuffle, random_state)
-    ds_train, ds_val, ds_test = ttorch.data.ProxyDataset(dataset=dataset, idxs=train_i), ttorch.data.ProxyDataset(dataset=dataset, idxs=val_i), ttorch.data.ProxyDataset(dataset=dataset, idxs=test_i)
-    return ds_train, ds_val, ds_test
+    train_data, val_data, test_data = wrap_data(data, train_i), wrap_data(data, val_i), wrap_data(data, test_i)
+    return train_data, val_data, test_data
+    
+def stratified_nested_kfold_split_data(data, y, n_splits, m_splits, split_i, split_j, shuffle=True, random_state=None):
+    """
+    Split data into train, validation, and test set
 
+    Parameters
+    ----------
+    data : pd.DataFrame or np.ndarray or torch.Tensor or torch.dat.Dataset object or iterable object (i.e. list)
+        Data to split
+
+    y: pd.Series or np.ndarray or torch.Tensor or iterable object (i.e. list)
+        Target variable to be used in stratified split
+
+    Returns
+    -------
+    train_data : train data of the same variable format
+    val_data : validation data of the same variable format
+    test_data : test data of the same variable format
+    """
+    train_i, val_i, test_i = stratified_nested_kfold_split_i(y, n_splits, m_splits, split_i, split_j, shuffle, random_state)
+    train_data, val_data, test_data = wrap_data(data, train_i), wrap_data(data, val_i), wrap_data(data, test_i)
+    return train_data, val_data, test_data
+
+def wrap_data(data, i):
+    if isinstance(data, np.ndarray):
+        return data[i]
+    elif isinstance(data, pd.DataFrame):
+        return data.iloc[i]
+    elif isinstance(data, torch.Tensor):
+        return data[i]
+    elif isinstance(data, torch.utils.data.Dataset):
+        return ttorch.data.ProxyDataset(dataset=data, idxs=i)
+    else:
+        return data[i]
 
 # %%
 # def train_val_test_split(x, val_size=0.1, test_size=0.1, random_state=None):
