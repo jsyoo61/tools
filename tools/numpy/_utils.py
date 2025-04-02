@@ -10,11 +10,28 @@ __all__ = [
 ]
 
 # %%
-def equal(array):
-    if len(array)<=1:
-        return True
+def equal(array, axis=None):
+    """
+    Check if all elements in the array are equal along the specified axis.
+
+    Parameters
+    ----------
+    array : array-like
+        Input array to check for equality.
+    axis : int, optional
+        Axis along which to check for equality. If None, check the entire array.
+
+    Returns
+    -------
+    bool or ndarray of bool
+        if axis is None, return True if all elements are equal, False otherwise.
+        if axis is specified, return an array of bools with axis dimension collapsed 
+    """
+    array = np.asarray(array)
+    if axis is None:
+        return np.all(array == array.flat[0])
     else:
-        return (array[0]==array[1:]).all()
+        return np.all(array == np.expand_dims(array.take(0, axis=axis), axis=axis), axis=axis)
 
 def merge_dict(ld):
     '''
