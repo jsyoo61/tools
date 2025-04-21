@@ -136,7 +136,7 @@ def nested_kfold_split_i(y, n_splits, m_splits, split_i, split_j, shuffle=True, 
 '''
 Train/(Validation)/Test split dataset functions
 '''
-def nested_kfold_split_dataset(data, y, n_splits, m_splits, split_i, split_j, shuffle=True, random_state=None):
+def nested_kfold_split_data(data, y, n_splits, m_splits, split_i, split_j, shuffle=True, random_state=None):
     '''
     y doesn't matter since it's not stratified
     '''
