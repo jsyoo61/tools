@@ -1,4 +1,4 @@
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA
 import numpy as np
 
@@ -46,8 +46,6 @@ def project_pca(x, var_threshold=None, n_pc=None, solver=None, random_state=0):
     solver : sklearn.decomposition.PCA()
         Solver used for PCA projection
     """
-    assert (var_threshold is None) ^ (n_pc is None), 'Only one of var_threshold or n_pc must be specified'
-
     # If svd_solver is not full, result is random
     if solver is None:
         solver = PCA(svd_solver='full', random_state=random_state)
@@ -59,9 +57,50 @@ def project_pca(x, var_threshold=None, n_pc=None, solver=None, random_state=0):
         n_pc = np.argmax(np.cumsum(solver.explained_variance_ratio_) > var_threshold) + 1
     elif n_pc is not None:
         pass
+    else:
+        n_pc = solver.n_components_
     x_pc = x_pc[:,:n_pc]
 
     return x_pc, solver
+
+# def minmaxscale(x, scaler=None, feature_range=(0, 1), *, copy=True, clip=False):
+def minmaxscale(x, scaler=None, **kwargs):
+    """
+    Min-max scale x without having to make a MinMaxScaler() object.
+
+    Parameters
+    ----------
+    x : ndarray of shape (n_observation, n_channel) 
+        data to be standardized.
+    scaler: sklearn.preprocessing.MinMaxScaler(), default=None
+        scaler to use (that has already fit())
+
+
+    Following arguments are applied if scaler is None:
+
+    feature_range : tuple (min, max), default=(0, 1)
+        Desired range of transformed data.
+        The default is (0, 1).
+    copy : bool, default=True
+        Set to False to perform inplace normalization and avoid a copy (if the input is already a numpy array).
+    clip : bool, default=False
+        Set to True to clip transformed values of held-out data.
+
+    Returns
+    -------
+    x_scaled : ndarray of shape (n_observation, n_channel)
+        Normalized data
+    scaler : sklearn.preprocessing.MinMaxScaler()
+        Scaler used for normalization
+    """
+    if scaler is None:
+        # scaler = MinMaxScaler(feature_range=feature_range, copy=copy, clip=clip)
+        scaler = MinMaxScaler(**kwargs)
+        x_scaled = scaler.fit_transform(x)
+    else:
+        x_scaled = scaler.transform(x)
+    
+    return x_scaled, scaler
 
 if __name__=='__main__':
     import tools as T

@@ -7,11 +7,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="tools-jsyoo61", # Replace with your own username
+    name="tools",
     version=__version__,
     author="JaeSung Yoo",
     author_email="jsyoo61@unc.edu",
-    description="personal syntax tool",
+    description="python syntax tool",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jsyoo61/tools",

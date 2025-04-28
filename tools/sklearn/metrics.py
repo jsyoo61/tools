@@ -4,12 +4,21 @@ import warnings
 import numpy as np
 from sklearn.metrics import r2_score as r2_score_sklearn
 
-def squared_error(y_true, y_pred):
-    return (y_true-y_pred)**2
+def squared_error(y_true, y_pred, axis=None):
+    '''MSE without mean
+    if axis is provided, it will return the mean along the axis
+    '''
+    score = (y_true-y_pred)**2
+    if axis is not None:
+        score = np.mean(score, axis=axis)
+    return score
 
-def absolute_error(y_true, y_pred):
+def absolute_error(y_true, y_pred, axis=None):
     '''MAE without mean'''
-    return np.abs(y_true-y_pred)
+    score = np.abs(y_true-y_pred)
+    if axis is not None:
+        score = np.mean(score, axis=axis)
+    return score
 
 def r2_score(y_true, y_pred, axis=None, multioutput='raw_values'):
     """
