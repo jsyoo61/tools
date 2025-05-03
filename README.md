@@ -17,4 +17,9 @@ API dependent tools are in their corresponding folders: `tools.API_name` (i.e. `
 Planning to document using chatGPT,
 Not documented yet, so you'll have to look at documents written inside the codes. (Most codes contain explanation)
 
-I'm happy to discuss questions or suggestions, please contact me via email. :) \
+I'm happy to discuss questions or suggestions, please contact me via email. :)
+
+1.0.1. (2025.5.1.)
+
+- `tools.sklearn.metrics.r2_score()` `multioutput` argument fixed
+- `tools.sklearn.metrics` axis=None returns a single np.float object
