@@ -187,7 +187,26 @@ def update_ld(ld, d):
 
     return ld
 
-def update_keys(d, d_key, copy=True): # inplace? copy?
+def update_keys(d, d_key, copy=False): # inplace? copy?
+    """
+    Update keys of a dictionary.
+
+    Parameters
+    ----------
+    d : dict
+        Dictionary to update.
+    d_key : dict
+        Dictionary of old and new keys.
+        The keys of d_key are the old keys, and the values are the new keys.
+    copy : bool, default=False
+        If True, a copy of the dictionary is made before updating the keys.
+
+    Returns
+    -------
+    d : dict
+        Updated dictionary with new keys.
+        If copy is True, a new dictionary is returned.
+    """
     if copy:
         d = dcopy(d)
     for k_old, k_new in d_key.items():

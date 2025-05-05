@@ -30,7 +30,7 @@ def squared_error(y_true, y_pred, axis=None):
 def absolute_error(y_true, y_pred, axis=None):
     """
     MAE averaging across specified axis.
-    if axis=(), returns entry-by-entry squared error.
+    if axis=(), returns entry-by-entry absolute error.
 
     Parameters
     ----------
@@ -61,9 +61,15 @@ def r2_score(y_true, y_pred, axis=None, multioutput='raw_values'):
     y_pred : np.ndarray
     axis: int or iterable of int, default=None
         Axis to collapse.
-        It must be specified if y_true and y_pred dimensions are > 2
+        If None, collapses all axes.
+        
     multioutput : Reference to `sklearn.metrics.r2_score`
         https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html
+
+        Note:
+        - default is 'raw_values', which is different from sklearn.
+        - when multioutput is uniform_average or variance_weighted, return value is a single float even if axis is specified.
+          The axis specifies the feature dimensions to average over.
     
     Returns
     -------
@@ -105,6 +111,18 @@ def r2_score(y_true, y_pred, axis=None, multioutput='raw_values'):
     elif multioutput == 'uniform_average':
         return score.mean()
     elif multioutput == 'variance_weighted':
+
+        # How to interpret variance weighted?
+        # var = np.var(y_true, axis=0)
+        # w = var / np.sum(var)
+        # score = score * w
+
+        # or
+
+        # score = score * np.var(y_true, axis=0)
+
+        # return score.reshape(*shape_final) if not axis_was_none else score[0]
+        
         return np.average(score, weights=np.var(y_true, axis=0))
     else:
         raise ValueError("multioutput must be one of ['raw_values', 'uniform_average', 'variance_weighted']")

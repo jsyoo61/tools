@@ -14,12 +14,13 @@ jsyoo61@unc.edu
 Most useful functions are in `tools.tools` which is loaded to the main module by default. \
 API dependent tools are in their corresponding folders: `tools.API_name` (i.e. `tools.torch.optim`)
 
-Planning to document using chatGPT,
-Not documented yet, so you'll have to look at documents written inside the codes. (Most codes contain explanation)
+Undocumented, so you'll have to look at documents written inside the codes or with help(). (Most codes contain explanation)
+Planning to document with chatGPT.
 
 I'm happy to discuss questions or suggestions, please contact me via email. :)
 
 1.0.1. (2025.5.1.)
-
 - `tools.sklearn.metrics.r2_score()` `multioutput` argument fixed
+
+1.0.2. (2025.5.3.)
 - `tools.sklearn.metrics` axis=None returns a single np.float object
