@@ -110,19 +110,7 @@ def r2_score(y_true, y_pred, axis=None, multioutput='raw_values'):
         return score
     elif multioutput == 'uniform_average':
         return score.mean()
-    elif multioutput == 'variance_weighted':
-
-        # How to interpret variance weighted?
-        # var = np.var(y_true, axis=0)
-        # w = var / np.sum(var)
-        # score = score * w
-
-        # or
-
-        # score = score * np.var(y_true, axis=0)
-
-        # return score.reshape(*shape_final) if not axis_was_none else score[0]
-        
+    elif multioutput == 'variance_weighted':        
         return np.average(score, weights=np.var(y_true, axis=0))
     else:
         raise ValueError("multioutput must be one of ['raw_values', 'uniform_average', 'variance_weighted']")
