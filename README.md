@@ -1,4 +1,4 @@
-# tools-jsyoo61
+# tools
 
 (`tools` package was replaced on 2025.04.28. If you're looking for web scraping tools, visit http://pypi.python.org/pypi/weblib)
 
@@ -19,8 +19,5 @@ Planning to document with chatGPT.
 
 I'm happy to discuss questions or suggestions, please contact me via email. :)
 
-1.0.1. (2025.5.1.)
-- `tools.sklearn.metrics.r2_score()` `multioutput` argument fixed
-
-1.0.2. (2025.5.3.)
-- `tools.sklearn.metrics` axis=None returns a single np.float object
+1.0.4. (2025.8.14.)
+- `tools.sklearn.metrics` stable, has proper arguments `axis_ref`, `axis_bias`
