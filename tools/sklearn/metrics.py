@@ -50,7 +50,7 @@ def absolute_error(y_true, y_pred, axis=None):
     score = np.mean(score, axis=axis)
     return score
 
-def r2_score(y_true, y_pred, axis=None, axis_ref=None, axis_bias=None, multioutput='raw_values', force_finite=True):
+def r2_score(y_true, y_pred, axis=None, axis_ref=None, axis_bias=None, force_finite=True):
     """
     R^2 score for multidimensional predictions.
     collapses all axes except the specified axis.
@@ -63,26 +63,21 @@ def r2_score(y_true, y_pred, axis=None, axis_ref=None, axis_bias=None, multioutp
     y_pred : np.ndarray
     axis: int or iterable of int, default=None
         Axis to collapse.
-        If None, collapses all axes.
+        If None, collapses all axes to yield a single number.
         
-    multioutput : Reference to `sklearn.metrics.r2_score`
-        https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html
+    axis_ref: reference axis to measure variability across, which normalizes r2 score.
 
-        Note:
-        - default is 'raw_values', which is different from sklearn.
-        - when multioutput is uniform_average or variance_weighted, return value is a single float even if axis is specified.
-          The axis specifies the feature dimensions to average over.
+    axis_bias: axis used to measure y_true.mean(axis_bias), when measuring reference variability (TSS) to normalize.
     
     Returns
     -------
     z : np.ndarray
-        if axis is specified, returns an array of shape (y_true.shape[axis],)
+        if axis is specified, returns an array of shape with remaining axes.
+        if axis=None, a single number is returned.
     """
 
-    # Residual Sum of Squares (RSS) and Total Sum of Squares (TSS)
-    RS = (y_true - y_pred)**2 # Residual Square (RS)
-    RSS = np.sum(RS, axis=axis, keepdims=True)
-
+    if axis is None: # Default to collapsing all dimensions
+        axis = tuple(range(y_true.ndim))
     if axis_ref is None:
         axis_ref = axis
     if axis_bias is None:
@@ -101,6 +96,10 @@ def r2_score(y_true, y_pred, axis=None, axis_ref=None, axis_bias=None, multioutp
     if not axis_set.issubset(axis_ref_set): # If axis is not a subset of axis_ref, expand axis_ref to include axis
         warnings.warn(f"axis {axis} is not a subset of axis_ref {axis_ref}, TSS sums over axis {axis_sum} and averages over remaining axis_ref {axis_mean}")
 
+    # Residual Sum of Squares (RSS) and Total Sum of Squares (TSS)
+    RS = (y_true - y_pred)**2 # Residual Square (RS)
+    RSS = np.sum(RS, axis=axis, keepdims=True)
+
     # axis_bias used to compute the mean of y_true
     y_mean = np.mean(y_true, axis=axis_bias, keepdims=True)
     TS = (y_true - y_mean)**2 # Total Square (TS)
@@ -116,7 +115,7 @@ def r2_score(y_true, y_pred, axis=None, axis_ref=None, axis_bias=None, multioutp
         score[np.isnan(score)] = 1
         score[np.isinf(score)] = 0 # -Inf means no fit, so set to 0
 
-    if axis is None:
+    if len(axis) == y_true.ndim:
         score = score.item()
 
     return score
