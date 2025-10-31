@@ -7,15 +7,22 @@ __all__ = [
 'ceil',
 'floor',
 'moving_mean',
+'sigmoid',
 'standardize',
 ]
 
 # %%
-def floor(x, decimals=0):
-    if decimals==0:
-        return np.floor(x)
-    else:
-        return np.floor(x * 10**decimals) / 10**decimals
+def angle(x1, x2):
+    '''angle between two vectors, derived from cosine rule
+    return theta within range of [0,np.pi]'''
+    theta = np.arccos(x1@x2/(np.linalg.norm(x1)*np.linalg.norm(x2)))
+    return theta
+
+def binarize(array, threshold):
+    '''binarize array with array>=threshold == 1'''
+    result = np.zeros_like(array)
+    result[array>=threshold] = 1
+    return result
 
 def ceil(x, decimals=0):
     if decimals==0:
@@ -23,14 +30,11 @@ def ceil(x, decimals=0):
     else:
         return np.ceil(x * 10**decimals) / 10**decimals
 
-def standardize(array, axis=None, ep=1e-20):
-    return (array - array.mean(axis=axis))/(array.std(axis=axis)+ep)
-
-def binarize(array, threshold):
-    '''binarize array with array>=threshold == 1'''
-    result = np.zeros_like(array)
-    result[array>=threshold] = 1
-    return result
+def floor(x, decimals=0):
+    if decimals==0:
+        return np.floor(x)
+    else:
+        return np.floor(x * 10**decimals) / 10**decimals
 
 def moving_mean(x, w):
     odd = bool(w%2)
@@ -46,14 +50,11 @@ def moving_mean(x, w):
         x = (x[w:] - x[:-w])/w
         return x
 
-def angle(x1, x2):
-    '''angle between two vectors, derived from cosine rule
-    return theta within range of [0,np.pi]'''
-    theta = np.arccos(x1@x2/(np.linalg.norm(x1)*np.linalg.norm(x2)))
-    return theta
-
 def sigmoid(x):
     return 1/(1+np.exp(-x))
+
+def standardize(array, axis=None, ep=1e-20):
+    return (array - array.mean(axis=axis))/(array.std(axis=axis)+ep)
 
 # %%
 if __name__ == '__main__':

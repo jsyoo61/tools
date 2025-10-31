@@ -1,12 +1,15 @@
 import numpy as np
 
 import tools as T
+import warnings
 
 # %%
 __all__ = [
 'equal',
+'isclose',
 'merge_dict',
-'Squeezer'
+'Squeezer',
+'unique_isclose'
 ]
 
 # %%
@@ -32,6 +35,100 @@ def equal(array, axis=None):
         return np.all(array == array.flat[0])
     else:
         return np.all(array == np.expand_dims(array.take(0, axis=axis), axis=axis), axis=axis)
+
+def isclose(array, axis, rtol=1e-05, atol=1e-08, equal_nan=False):
+    """
+    Same with numpy.isclose, but casted on a single array not multiple.
+
+    Parameters
+    ----------
+    array : array-like
+    axis : int or tuple of ints
+        Axis to check for isclose
+    rtol : array-like
+        The relative tolerance parameter
+    atol: array-like
+        The absolute tolerance parameter
+    equal_nan : bool
+        Whether to compare NaN’s as equal. If True, NaN’s in a will be considered equal to NaN’s in b in the output array.
+        
+    Returns
+    -------
+    array : boolean ndarray of shape without the specified axis
+
+    See Also
+    --------
+    np.isclose (https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
+    """
+    if not T.is_iterable(axis):
+        axis = (axis,)
+
+    axis = tuple(array.ndim+ax_ if ax_<0 else ax_ for ax_ in axis)
+    index_ref = tuple(slice(None) if axis_ not in axis else 0 for axis_ in range(array.ndim))
+
+    array_ref = np.expand_dims(array[index_ref], axis=axis)
+
+    return np.isclose(array, array_ref, rtol=rtol, atol=atol, equal_nan=equal_nan).all(axis) # True only if isclose across all elements within the specified axis
+
+def unique_isclose(ar, rtol=1e-05, atol=1e-08, return_index=False, return_inverse=False, return_counts=False, equal_nan=True, sorted=True):
+    """
+    Combination of np.unique and np.isclose. Basically np.unique with numerical evaluation.
+
+    Parameters
+    ----------
+    ar : 1-d array
+
+    rtol : array-like
+        The relative tolerance parameter
+    atol: array-like
+        The absolute tolerance parameter
+    equal_nan : bool, optional
+        Whether to compare NaN’s as equal. If True, NaN’s in a will be considered equal to NaN’s in b in the output array.
+
+    return_index : bool, optional (NotImplemented)
+        If True, also return the indices of ar (along the specified axis, if provided, or in the flattened array) that result in the unique array.
+    return_inverse: bool, optional (NotImplemented)
+        If True, also return the indices of the unique array (for the specified axis, if provided) that can be used to reconstruct ar.
+    return_counts: bool, optional
+        If True, also return the number of times each unique item appears in ar.
+
+    Returns
+    -------
+    unique : ndarray
+
+    unique_counts: ndarray, optional
+
+    See Also
+    --------
+    np.unique (https://numpy.org/devdocs/reference/generated/numpy.unique.html)
+    np.isclose (https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
+    """
+
+    assert ar.ndim==1, 'Only 1-dimensional arrays are supported'
+
+    if return_index:
+        warnings.warn("return_index NotImplemented")
+
+    if return_inverse:
+        warnings.warn("return_inverse NotImplemented")
+    
+    if not sorted:
+        warnings.warn("Currently the unique elements are always sorted.")
+
+    ar = np.sort(ar)
+
+    unique_i = ~np.isclose(ar[1:], ar[:-1], rtol=rtol, atol=atol, equal_nan=equal_nan)
+    unique_i = np.concatenate([[True], unique_i])
+    unique = ar[unique_i]
+
+    if return_counts:
+        counts = np.where(unique_i)[0]
+        counts = np.concatenate([counts, [ar.size]])
+        counts = np.diff(counts)
+
+        return unique, counts
+
+    return unique
 
 def merge_dict(ld):
     '''
