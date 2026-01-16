@@ -202,7 +202,7 @@ def update_ld(ld, d):
 
     return ld
 
-def update_keys(d, d_key, copy=False): # inplace? copy?
+def update_keys(d, d_key, inplace=False): # inplace? copy?
     """
     Update keys of a dictionary.
 
@@ -222,7 +222,7 @@ def update_keys(d, d_key, copy=False): # inplace? copy?
         Updated dictionary with new keys.
         If copy is True, a new dictionary is returned.
     """
-    if copy:
+    if not inplace:
         d = dcopy(d)
     for k_old, k_new in d_key.items():
         d[k_new] = d.pop(k_old)

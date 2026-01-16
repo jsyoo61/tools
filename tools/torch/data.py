@@ -4,6 +4,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.utils.data as D
 
+import warnings
+
 class ProxyDataset(D.Dataset):
     """
     ProxyDataset that does not copy the data of the original dataset.
@@ -17,20 +19,30 @@ class ProxyDataset(D.Dataset):
     idxs : list
         List of indices to use for the proxy dataset
     """
+    attr_list = ['dataset', 'idxs']
     def __init__(self, dataset, idxs):
         self.dataset = dataset
         self.idxs = idxs
 
-        # Copy attributes from the original dataset
-        keys = [key for key in dir(dataset) if key.startswith('__') is False]
-        for key in keys:
-            setattr(self, key, getattr(dataset, key))
+        # # Copy attributes from the original dataset
+        # keys = [key for key in dir(dataset) if key.startswith('__') is False]
+        # for key in keys:
+        #     setattr(self, key, getattr(dataset, key))
+        duplicate_keys = [key for key in dir(self.dataset) if key in self.attr_list]
+        if len(duplicate_keys)>0:
+            warnings.warn(f'The following attributes from dataset will not be accessible by getattr as it overlaps with ProxyDataset\'s attributes: {duplicate_keys}')
 
     def __repr__(self):
         return f'ProxyDataset({self.dataset}, len: {len(self)}/{len(self.dataset)}({len(self)/len(self.dataset)*1e2:.0f}%))'
 
     def __getitem__(self, idx):
         return self.dataset[self.idxs[idx]]
+
+    def __getattr__(self, key):
+        if key in self.attr_list:
+            return getattr(self, key)
+        else:
+            return getattr(self.dataset, key)
 
     def __len__(self):
         return len(self.idxs)

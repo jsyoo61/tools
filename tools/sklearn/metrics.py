@@ -50,6 +50,13 @@ def absolute_error(y_true, y_pred, axis=None):
     score = np.mean(score, axis=axis)
     return score
 
+def axis_fix(axis, ndim):
+    if not isinstance(axis, Iterable):
+        axis = (axis,)
+    
+    axis = tuple(ax if ax>=0 else ndim+ax for ax in axis)
+    return axis
+
 def r2_score(y_true, y_pred, axis=None, axis_ref=None, axis_bias=None, force_finite=True):
     """
     R^2 score for multidimensional predictions.
@@ -78,13 +85,17 @@ def r2_score(y_true, y_pred, axis=None, axis_ref=None, axis_bias=None, force_fin
 
     if axis is None: # Default to collapsing all dimensions
         axis = tuple(range(y_true.ndim))
+    elif not isinstance(axis, Iterable): # axis is a single int
+        axis = (axis,)
     if axis_ref is None:
         axis_ref = axis
     if axis_bias is None:
         axis_bias = axis_ref
 
+    axis, axis_ref, axis_bias = axis_fix(axis, y_true.ndim), axis_fix(axis_ref, y_true.ndim), axis_fix(axis_bias, y_true.ndim)
+
     axis_ref_set = {axis_ref} if not isinstance(axis_ref, Iterable) else set(axis_ref)
-    axis_set = {axis} if not isinstance(axis, Iterable) else set(axis)
+    axis_set = set(axis)
     axis_bias_set = {axis_bias} if axis_bias is not None and not isinstance(axis_bias, Iterable) else set(axis_bias) if axis_bias is not None else set()
 
     assert axis_bias_set.issubset(axis_ref_set), f'axis_bias ({axis_bias}) must be a subset of axis_ref ({axis_ref}) because axis_ measure variability' # If axis_bias is not a subset of axis_ref, expand axis_ref to include axis_bias

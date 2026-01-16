@@ -136,17 +136,31 @@ def nested_kfold_split_i(y, n_splits, m_splits, split_i, split_j, shuffle=True, 
 '''
 Train/(Validation)/Test split dataset functions
 '''
-def nested_kfold_split_data(data, y, n_splits, m_splits, split_i, split_j, shuffle=True, random_state=None):
-    '''
-    y doesn't matter since it's not stratified
-    '''
-    train_i, val_i, test_i = nested_kfold_split_i(y, n_splits, m_splits, split_i, split_j, shuffle, random_state)
-    train_data, val_data, test_data = wrap_data(data, train_i), wrap_data(data, val_i), wrap_data(data, test_i)
-    return train_data, val_data, test_data
-    
-def stratified_nested_kfold_split_data(data, y, n_splits, m_splits, split_i, split_j, shuffle=True, random_state=None):
+
+def train_test_split_data(data, y, test_size=0.15, random_state=None):
     """
-    Split data into train, validation, and test set
+    Split data into train, test set using train_test_split
+
+    Parameters
+    ----------
+    data : pd.DataFrame or np.ndarray or torch.Tensor or torch.dat.Dataset object or iterable object (i.e. list)
+        Data to split
+
+    y: pd.Series or np.ndarray or torch.Tensor or iterable object (i.e. list)
+        Needs to be identical to the length of data, only the length is referenced. (Placeholder for consistency)
+
+    Returns
+    -------
+    train_data : train data of the same type as data
+    test_data : test data of the same type as data
+    """
+    train_i, test_i = train_test_split_i(y, test_size=test_size, random_state=random_state)
+    train_data, test_data = wrap_data(data, train_i), wrap_data(data, test_i)
+    return train_data, test_data
+
+def stratified_train_test_split_data(data, y, test_size=0.15, random_state=None):
+    """
+    Split data into train, test set using stratified_train_test_split
 
     Parameters
     ----------
@@ -158,9 +172,53 @@ def stratified_nested_kfold_split_data(data, y, n_splits, m_splits, split_i, spl
 
     Returns
     -------
-    train_data : train data of the same variable format
-    val_data : validation data of the same variable format
-    test_data : test data of the same variable format
+    train_data : train data of the same type as data
+    test_data : test data of the same type as data
+    """
+    train_i, test_i = stratified_train_test_split_i(y, test_size=test_size, random_state=random_state)
+    train_data, test_data = wrap_data(data, train_i), wrap_data(data, test_i)
+    return train_data, test_data
+
+def nested_kfold_split_data(data, y, n_splits, m_splits, split_i, split_j, shuffle=True, random_state=None):
+    '''
+    Split data into train, validation, and test set using nested_kfold_split
+    y doesn't matter since it's not stratified
+
+    Parameters
+    ----------
+    data : pd.DataFrame or np.ndarray or torch.Tensor or torch.dat.Dataset object or iterable object (i.e. list)
+        Data to split
+
+    y: pd.Series or np.ndarray or torch.Tensor or iterable object (i.e. list)
+        Target variable to be used in stratified split
+
+    Returns
+    -------
+    train_data : train data of the same type as data
+    val_data : validation data of the same type as data
+    test_data : test data of the same type as data
+    '''
+    train_i, val_i, test_i = nested_kfold_split_i(y, n_splits, m_splits, split_i, split_j, shuffle, random_state)
+    train_data, val_data, test_data = wrap_data(data, train_i), wrap_data(data, val_i), wrap_data(data, test_i)
+    return train_data, val_data, test_data
+    
+def stratified_nested_kfold_split_data(data, y, n_splits, m_splits, split_i, split_j, shuffle=True, random_state=None):
+    """
+    Split data into train, validation, and test set using stratified_nested_kfold_split
+
+    Parameters
+    ----------
+    data : pd.DataFrame or np.ndarray or torch.Tensor or torch.dat.Dataset object or iterable object (i.e. list)
+        Data to split
+
+    y: pd.Series or np.ndarray or torch.Tensor or iterable object (i.e. list)
+        Target variable to be used in stratified split
+
+    Returns
+    -------
+    train_data : train data of the same type as data
+    val_data : validation data of the same type as data
+    test_data : test data of the same type as data
     """
     train_i, val_i, test_i = stratified_nested_kfold_split_i(y, n_splits, m_splits, split_i, split_j, shuffle, random_state)
     train_data, val_data, test_data = wrap_data(data, train_i), wrap_data(data, val_i), wrap_data(data, test_i)
