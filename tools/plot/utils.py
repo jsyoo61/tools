@@ -3,6 +3,7 @@ import os
 import warnings
 
 import numpy as np
+import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from .. import numpy as tnp
 # log = logging.getLogger(__name__)
@@ -10,6 +11,7 @@ from .. import numpy as tnp
 __all__ = [
 'get_xtick_seconds',
 'multisave',
+'squaresubplots',
 ]
 
 # %%
@@ -65,6 +67,38 @@ def plot_trainval(valuetracker_list, ax=None):
         ax.plot(valuetracker.x, valuetracker.y, color=color, alpha=0.4, label=label)
         ax.plot(valuetracker.x, y_smooth, line, color=color, label=label+'_smooth')
     return ax
+
+def squaresubplots(n_axes, figsize=None, axsize=None):
+    """
+    Return the axes and figures of a square grid of subplots.
+
+    Parameters
+    ----------
+    n_axes : number of axes (int)
+    figsize : size of the figure, (tuple, optional)
+    
+    Returns
+    -------
+    fig : figure
+    axes : np.ndarray of shape (n_rows, n_cols)
+    """
+    n = np.sqrt(n_axes)
+    if n.is_integer():
+        nrows, ncols = int(n), int(n)
+    else:
+        nrows, ncols = int(n)+1, int(n)
+        if nrows*ncols < n_axes:
+            ncols += 1
+
+    if axsize is not None:
+        figsize = (axsize[0]*ncols, axsize[1]*nrows)
+        if figsize is not None:
+            warnings.warn('axsize is provided, figsize will be ignored.')
+
+    fig, axes = plt.subplots(nrows, ncols, figsize=figsize)
+    if not issubclass(type(axes), np.ndarray):
+        axes = np.array([[axes]])
+    return fig, axes
 
 if __name__ == '__main__':
     pass

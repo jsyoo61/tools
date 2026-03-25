@@ -7,6 +7,8 @@ __all__ = [
 'ceil',
 'floor',
 'moving_mean',
+'proj_lstsq',
+'proj_qr',
 'sigmoid',
 'standardize',
 ]
@@ -49,6 +51,17 @@ def moving_mean(x, w):
         x = np.cumsum(x).astype(np.float64)
         x = (x[w:] - x[:-w])/w
         return x
+
+def proj_lstsq(A, v):
+    x, res, rank, rho = np.linalg.lstsq(A, v)
+    b = A@x
+    return b
+
+def proj_qr(A, v):
+    q, r = np.linalg.qr(A)
+    x = q.T@v
+    b = q@x
+    return b
 
 def sigmoid(x):
     return 1/(1+np.exp(-x))
