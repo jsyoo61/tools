@@ -70,43 +70,46 @@ def axis_fix(axis, ndim):
         Normalized axis as a tuple of non-negative integers.
     """
     if not isinstance(axis, Iterable): # axis is a single int
+        assert type(axis) is int, 'type(axis) should be integer'
         axis = (axis,)
     
     axis = tuple(ax if ax>=0 else ndim+ax for ax in axis)
     return axis
 
-def TSS_score(y_true, axis=None, axis_ref=None, axis_bias=None):
+def TSS_score(y_true, axis=None, axis_norm=None, axis_pool=None):
+
     # Axis fixing
     axis = tuple(range(y_true.ndim)) if axis is None else axis # Default to collapsing all dimensions
-    axis_ref = axis if axis_ref is None else axis_ref
-    axis_bias = axis_ref if axis_bias is None else axis_bias
-    axis, axis_ref, axis_bias = axis_fix(axis, y_true.ndim), axis_fix(axis_ref, y_true.ndim), axis_fix(axis_bias, y_true.ndim)
+    axis_norm = axis if axis_norm is None else axis_norm
+    axis_pool = axis_norm if axis_pool is None else axis_pool
+    axis, axis_norm, axis_pool = axis_fix(axis, y_true.ndim), axis_fix(axis_norm, y_true.ndim), axis_fix(axis_pool, y_true.ndim)
 
     # axis trimming operations for computing TSS
-    axis_ref_set = {axis_ref} if not isinstance(axis_ref, Iterable) else set(axis_ref)
-    axis_set = set(axis)
-    axis_bias_set = {axis_bias} if axis_bias is not None and not isinstance(axis_bias, Iterable) else set(axis_bias) if axis_bias is not None else set()
+    axis_set, axis_norm_set, axis_pool_set = set(axis), set(axis_norm), set(axis_pool)
+    # axis_pool_set = {axis_pool} if not isinstance(axis_pool, Iterable) else set(axis_pool)
+    # axis_set = set(axis)
+    # axis_norm_set = {axis_norm} if axis_norm is not None and not isinstance(axis_norm, Iterable) else set(axis_norm) if axis_norm is not None else set()
 
-    assert axis_bias_set.issubset(axis_ref_set), f'axis_bias ({axis_bias}) must be a subset of axis_ref ({axis_ref}) because axis_ measure variability' # If axis_bias is not a subset of axis_ref, expand axis_ref to include axis_bias
+    assert axis_norm_set.issubset(axis_pool_set), f'axis_norm {axis_norm} must be a subset of axis_pool {axis_pool} because axis_norm defines variability and axis_pool additionally averages'
 
-    # Dimensions of TSS must be smaller than RSS, so mean/sum over axis_ref and axis
+    # Dimensions of TSS must be smaller than RSS, so mean/sum over axis_pool and axis
     axis_sum = axis
-    axis_mean = tuple(axis_ref_set - axis_set) # Average over axis_ref - axis
+    axis_mean = tuple(axis_pool_set - axis_set) # Average over axis_pool - axis
 
-    if not axis_set.issubset(axis_ref_set): # If axis is not a subset of axis_ref, expand axis_ref to include axis
-        warnings.warn(f"axis {axis} is not a subset of axis_ref {axis_ref}, TSS sums over axis {axis_sum} and averages over remaining axis_ref {axis_mean}")
+    if not axis_set.issubset(axis_pool_set): # If axis is not a subset of axis_pool, expand axis_pool to include axis
+        warnings.warn(f"axis {axis} is not a subset of axis_pool {axis_pool}, TSS sums over axis {axis_sum} and averages over remaining axis_pool {axis_mean}")
 
-    # axis_bias used to compute the mean of y_true
-    y_mean = np.mean(y_true, axis=axis_bias, keepdims=True)
+    # axis_norm used to compute the mean of y_true
+    y_mean = np.mean(y_true, axis=axis_norm, keepdims=True)
     TS = (y_true - y_mean)**2 # Total Square (TS)
 
-    # axis_ref used to aggregate additional dimensions (average) additional to axis
+    # axis_pool used to aggregate additional dimensions (average) additional to axis
     TSS = np.mean(TS, axis=axis_mean, keepdims=True)
     TSS = np.sum(TSS, axis=axis_sum, keepdims=True)
 
     return TSS
 
-def r2_score(y_true, y_pred, axis=None, axis_ref=None, axis_bias=None, force_finite=True, TSS=None):
+def r2_score(y_true, y_pred, axis=None, axis_norm=None, axis_pool=None, force_finite=True, TSS=None):
     """
     R^2 score for multidimensional predictions.
     collapses all axes except the specified axis.
@@ -120,10 +123,15 @@ def r2_score(y_true, y_pred, axis=None, axis_ref=None, axis_bias=None, force_fin
     axis: int or iterable of int, default=None
         Axis to collapse.
         If None, collapses all axes to yield a single number.
-        
-    axis_ref: reference axis to measure variability across, which normalizes r2 score.
 
-    axis_bias: axis used to measure y_true.mean(axis_bias), when measuring reference variability (TSS) to normalize.
+            
+    axis_norm: int or iterable of int, default=None
+        axis used to measure y_true.mean(axis=axis_norm), to measure reference variability (TSS) for normalizing.
+        It is recommended to keep axis_norm minimal, since a smaller axis_norm yields more localized TSS and a more detailed Dim-R2. 
+
+    axis_pool: int or iterable of int, default=None
+        axis used to additionally average TSS across for broader evaluation.
+        It is recommended to keep axis_pool minimal, since a smaller axis_pool yields more localized normalization references, providing a more detailed Dim-R2.
     
     Returns
     -------
@@ -134,9 +142,9 @@ def r2_score(y_true, y_pred, axis=None, axis_ref=None, axis_bias=None, force_fin
 
     # Axis fixing
     axis = tuple(range(y_true.ndim)) if axis is None else axis # Default to collapsing all dimensions
-    axis_ref = axis if axis_ref is None else axis_ref
-    axis_bias = axis_ref if axis_bias is None else axis_bias
-    axis, axis_ref, axis_bias = axis_fix(axis, y_true.ndim), axis_fix(axis_ref, y_true.ndim), axis_fix(axis_bias, y_true.ndim)
+    axis_norm = axis if axis_norm is None else axis_norm
+    axis_pool = axis_norm if axis_pool is None else axis_pool
+    axis, axis_norm, axis_pool = axis_fix(axis, y_true.ndim), axis_fix(axis_norm, y_true.ndim), axis_fix(axis_pool, y_true.ndim)
 
     # Residual Sum of Squares (RSS) 
     RS = (y_true - y_pred)**2 # Residual Square (RS)
@@ -144,7 +152,7 @@ def r2_score(y_true, y_pred, axis=None, axis_ref=None, axis_bias=None, force_fin
 
     # Total Sum of Squares (TSS)
     if TSS is None:
-        TSS = TSS_score(y_true=y_true, axis=axis, axis_ref=axis_ref, axis_bias=axis_bias)
+        TSS = TSS_score(y_true=y_true, axis=axis, axis_norm=axis_norm, axis_pool=axis_pool)
     else: # TSS is given
         try:
             TSS = np.broadcast_to(TSS, RSS.shape)
