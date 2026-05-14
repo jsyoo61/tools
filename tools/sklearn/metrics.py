@@ -174,6 +174,68 @@ def r2_score(y_true, y_pred, axis=None, axis_norm=None, axis_pool=None, force_fi
 
     return score
 
+def ICC(data, icc_type=(2,1)):
+    """
+    Intraclass correlation coefficient (ICC) via two-way ANOVA decomposition.
+    Following Shrout & Fleiss (1979) notation.
+
+    Parameters
+    ----------
+    data : array-like of shape (k, n)
+        Rows are judges/raters (k), columns are targets (n).
+    icc_type : tuple
+        (1,1) - one-way random, single measures
+        (1,None) - one-way random, average of k measures
+        (2,1) - two-way random, absolute agreement, single measures
+        (2,None) - two-way random, absolute agreement, average measures
+        (3,1) - two-way mixed, consistency, single measures
+        (3,None) - two-way mixed, consistency, average measures
+
+    Returns
+    -------
+    float
+        ICC value.
+    """
+    data = np.asarray(data, dtype=float)
+    assert data.ndim==2, f'data must be 2D (k_judges x n_targets), received shape: {data.shape}'
+    k, n = data.shape  # k judges (rows), n targets (columns)
+    assert len(icc_type)==2, f'icc_type must be 2D (case, avg), received: {icc_type}'
+
+    mu   = data.mean()
+    mu_C = data.mean(axis=0)  # (n,) column means (targets)
+    SSC  = k * ((mu_C - mu) ** 2).sum()
+    SST  = ((data - mu) ** 2).sum()
+    BMS  = SSC / (n - 1)
+
+    case, avg = icc_type[0], icc_type[1] is None
+
+    if case == 1:
+        WMS = (SST - SSC) / (n * (k - 1))
+        if avg:
+            icc = (BMS - WMS) / BMS
+        else:
+            icc = (BMS - WMS) / (BMS + (k - 1) * WMS)
+    elif case in (2, 3):
+        mu_R = data.mean(axis=1)  # (k,) row means (judges)
+        SSR  = n * ((mu_R - mu) ** 2).sum()
+        SSE = SST - SSC - SSR
+        EMS  = SSE / ((n - 1) * (k - 1))
+        if case == 2:
+            JMS = SSR / (k - 1)
+            if avg:
+                icc = (BMS - EMS) / (BMS + (JMS - EMS) / n)
+            else:
+                icc = (BMS - EMS) / (BMS + (k - 1) * EMS + k * (JMS - EMS) / n)
+        else:  # case == 3
+            if avg:
+                icc = (BMS - EMS) / BMS
+            else:
+                icc = (BMS - EMS) / (BMS + (k - 1) * EMS)
+    else:
+        raise ValueError(f'Unknown icc_type: {icc_type!r}. '
+                         'Choose from (1,1), (1,None), (2,1), (2,None), (3,1), (3,None).')
+    return icc
+
 # Binary classification
 def sensitivity_score(y_true, y_pred): # alias
     '''sensitivity == recall == tpr'''
@@ -234,70 +296,5 @@ def classification_report_full(y_true, y_pred=None, y_score=None, ovr=True):
         scores.update(scores_all)
 
     return scores
-
-# def r2_score(y_true, y_pred, axis=None, multioutput='raw_values'):
-#     """
-#     R^2 score for multidimensional predictions.
-#     collapses all axes except the specified axis.
-
-#     Parameters
-#     ----------
-#     y_true : np.ndarray
-#     y_pred : np.ndarray
-#     axis: int or iterable of int, default=None
-#         Axis to collapse.
-#         If None, collapses all axes.
-        
-#     multioutput : Reference to `sklearn.metrics.r2_score`
-#         https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html
-
-#         Note:
-#         - default is 'raw_values', which is different from sklearn.
-#         - when multioutput is uniform_average or variance_weighted, return value is a single float even if axis is specified.
-#           The axis specifies the feature dimensions to average over.
-    
-#     Returns
-#     -------
-#     z : np.ndarray
-#         if axis is specified, returns an array of shape (y_true.shape[axis],)
-#     """
-#     assert y_true.shape == y_pred.shape, f"y_true and y_pred must have the same shape, received: {y_true.shape} and {y_pred.shape}"
-#     if axis is None:
-#         axis = list(range(y_true.ndim)) # Collapse all dimensions
-#         axis_was_none = True
-#     elif not isinstance(axis, Iterable):
-#         axis = [axis]
-#         axis_was_none = False
-#     else:
-#         axis = list(axis)
-#         axis_was_none = False
-
-#     if len(axis) > y_true.ndim:
-#         raise ValueError("Axis is greater than the number of dimensions of y_true and y_pred")
-
-#     dim_collapse = axis
-#     dim_final = list(set(range(y_true.ndim)).difference(axis))
-#     shape_final = np.array(y_true.shape)[dim_final] if len(dim_final)!=0 else (1,)
-
-#     y_true = np.transpose(y_true, (*dim_collapse, *dim_final)).reshape(-1, np.prod(shape_final)) # Move axis to the end, and flatten the rest
-#     y_pred = np.transpose(y_pred, (*dim_collapse, *dim_final)).reshape(-1, np.prod(shape_final))
-
-#     # score = r2_score_sklearn(y_true, y_pred, multioutput=multioutput)
-#     score = r2_score_sklearn(y_true, y_pred, multioutput='raw_values')
-
-#     if type(score) == float and np.isnan(score).item():
-#         warnings.warn("R2 score is a single NaN, shape matching with NaN")
-#         score = np.full(shape_final, np.nan)
-#         return score
-
-#     if multioutput == 'raw_values':
-#         score = score.reshape(*shape_final) if not axis_was_none else score[0]
-#         return score
-#     elif multioutput == 'uniform_average':
-#         return score.mean()
-#     elif multioutput == 'variance_weighted':        
-#         return np.average(score, weights=np.var(y_true, axis=0))
-#     else:
-#         raise ValueError("multioutput must be one of ['raw_values', 'uniform_average', 'variance_weighted']")
 
 # %%
