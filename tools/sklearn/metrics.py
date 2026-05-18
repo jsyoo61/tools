@@ -174,7 +174,7 @@ def r2_score(y_true, y_pred, axis=None, axis_norm=None, axis_pool=None, force_fi
 
     return score
 
-def ICC(data, icc_type=(2,1)):
+def ICC(data, icc_type=(2,1), per_param=False):
     """
     Intraclass correlation coefficient (ICC) via two-way ANOVA decomposition.
     Following Shrout & Fleiss (1979) notation.
@@ -184,57 +184,71 @@ def ICC(data, icc_type=(2,1)):
     data : array-like of shape (k, n)
         Rows are judges/raters (k), columns are targets (n).
     icc_type : tuple
-        (1,1) - one-way random, single measures
+        (1,1)    - one-way random, single measures
         (1,None) - one-way random, average of k measures
-        (2,1) - two-way random, absolute agreement, single measures
+        (2,1)    - two-way random, absolute agreement, single measures
         (2,None) - two-way random, absolute agreement, average measures
-        (3,1) - two-way mixed, consistency, single measures
+        (3,1)    - two-way mixed, consistency, single measures
         (3,None) - two-way mixed, consistency, average measures
+    per_param : bool
+        If True, return per-target ICC of shape (n,).
 
     Returns
     -------
-    float
-        ICC value.
+    float or np.ndarray
+        ICC value(s).
     """
     data = np.asarray(data, dtype=float)
     assert data.ndim==2, f'data must be 2D (k_judges x n_targets), received shape: {data.shape}'
     k, n = data.shape  # k judges (rows), n targets (columns)
     assert len(icc_type)==2, f'icc_type must be 2D (case, avg), received: {icc_type}'
+    case, avg = icc_type[0], icc_type[1]
+    assert case in (1,2,3) and avg in (1, None), f'Unknown icc type: {icc_type}. Choose from (1,1), (1,None), (2,1), (2,None), (3,1), (3,None)'
+    avg = icc_type[1] is None
+    assert not (per_param and avg), 'per_param and icc_type=(n, None) is currently undefined'
 
     mu   = data.mean()
     mu_C = data.mean(axis=0)  # (n,) column means (targets)
     SSC  = k * ((mu_C - mu) ** 2).sum()
-    SST  = ((data - mu) ** 2).sum()
-    BMS  = SSC / (n - 1)
+    SSW_j = ((data-mu_C)**2).sum(axis=0)
+    SSW = SSW_j.sum() # == SST-SSC
 
-    case, avg = icc_type[0], icc_type[1] is None
+    BMS  = SSC / (n - 1)
+    WMS_j = SSW_j / (k - 1) if per_param else None
+    WMS = (SSW) / (n * (k - 1))
+
+    if case in (2,3):
+        mu_R = data.mean(axis=1)  # (k,) row means (judges)
+        SSR  = n * ((mu_R - mu) ** 2).sum()
+        SSE = SSW - SSR # == SST - SSC - SSR
+        JMS = SSR / (k - 1)
+        EMS  = SSE / ((n - 1) * (k - 1))
 
     if case == 1:
-        WMS = (SST - SSC) / (n * (k - 1))
         if avg:
             icc = (BMS - WMS) / BMS
         else:
-            icc = (BMS - WMS) / (BMS + (k - 1) * WMS)
-    elif case in (2, 3):
-        mu_R = data.mean(axis=1)  # (k,) row means (judges)
-        SSR  = n * ((mu_R - mu) ** 2).sum()
-        SSE = SST - SSC - SSR
-        EMS  = SSE / ((n - 1) * (k - 1))
-        if case == 2:
-            JMS = SSR / (k - 1)
-            if avg:
-                icc = (BMS - EMS) / (BMS + (JMS - EMS) / n)
+            # icc = (BMS - WMS) / (BMS + (k - 1) * WMS)
+            icc = 1 - k * (WMS_j if per_param else WMS) / (BMS + (k - 1) * WMS) # identical, matter of perspective
+            
+    elif case == 2:
+        if avg:
+            icc = (BMS - EMS) / (BMS + (JMS - EMS) / n)
+        else:
+            # icc = (BMS - EMS) / (BMS + (k - 1) * EMS + k * (JMS - EMS) / n)
+            icc = 1 - k * (WMS_j if per_param else WMS) / (BMS - EMS + k * WMS) # identical, matter of perspective
+
+    elif case == 3:
+        if avg:
+            icc = (BMS - EMS) / BMS
+        else:
+            if per_param:
+                icc = 1 - ( k / (n-1) ) * ( n * WMS_j - JMS) / (BMS + (k - 1) * EMS)
             else:
-                icc = (BMS - EMS) / (BMS + (k - 1) * EMS + k * (JMS - EMS) / n)
-        else:  # case == 3
-            if avg:
-                icc = (BMS - EMS) / BMS
-            else:
-                icc = (BMS - EMS) / (BMS + (k - 1) * EMS)
-    else:
-        raise ValueError(f'Unknown icc_type: {icc_type!r}. '
-                         'Choose from (1,1), (1,None), (2,1), (2,None), (3,1), (3,None).')
-    return icc
+                # icc = (BMS - EMS) / (BMS + (k - 1) * EMS)
+                icc = 1 - k * EMS / (BMS + (k - 1) * EMS) # identical, matter of perspective
+
+    return icc if per_param else icc.item()
 
 # Binary classification
 def sensitivity_score(y_true, y_pred): # alias
